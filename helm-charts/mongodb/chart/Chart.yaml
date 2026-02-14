@@ -7,9 +7,9 @@ version: 1.0.0
 appVersion: "4.4.12" # MongoDB version 4.4.12
 
 dependencies:
-- name: mongodb
-  version: 12.1.31
-  repository: https://charts.bitnami.com/bitnami
+#  - name: mongodb
+#    version: 12.1.31
+#    repository: https://charts.bitnami.com/bitnami
 
 maintainers:
   - name: Felipe Roca

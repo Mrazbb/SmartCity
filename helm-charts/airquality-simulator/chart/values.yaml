@@ -136,7 +136,7 @@ init:
     image:
       # -- subscription init image name
       # ref: https://quay.io/fiware/v2-subscription-init
-      repository: docker.io/bitnami/keycloak-config-cli
+      repository: quay.io/adorsys/keycloak-config-cli
       # -- tag of the image to be used
       tag: 5.2.0-debian-10-r9
       # -- specification of the image pull policy

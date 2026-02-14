@@ -19,8 +19,8 @@ maintainers:
   - name: Stefan Wiedemann 
     email: stefan.wiedemann@fiware.org
 dependencies:
-- name: keycloak
-  version: 8.0.0 
-  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
+#  - name: keycloak
+#    version: 8.0.0 
+#    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
 
 

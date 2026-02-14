@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "keycloak.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:17.0.1
+          args: ["start-dev", "--import-realm"]
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.auth.adminUser }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.keycloak.auth.adminPassword }}
+            - name: KC_PROXY
+              value: "edge"
+            - name: KC_HTTP_RELATIVE_PATH
+              value: "/"
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: realm-config
+          configMap:
+            name: {{ include "keycloak.name" . }}-realm

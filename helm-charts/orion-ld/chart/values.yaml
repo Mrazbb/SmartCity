@@ -6,6 +6,9 @@ orion-ld:
       hosts:
         - mongodb-orion
       user: root
+      existingSecret:
+        name: mongodb-orion
+        key: mongodb-root-password
     logging:
       level: "WARN"
   deployment:

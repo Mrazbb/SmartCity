@@ -30,8 +30,13 @@ spec:
       http:
         paths:
         {{- range .paths }}
+        {{- if typeIs "string" . }}
         - path: {{ . }}
           pathType: Prefix
+        {{- else }}
+        - path: {{ .path }}
+          pathType: {{ .pathType | default "Prefix" }}
+        {{- end }}
           backend:
             service:
               name: {{ $fullName }}

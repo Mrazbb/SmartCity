@@ -19,7 +19,7 @@ data:
                 -H "Accept: application/json"
 
     # Check that admin user can retrieve token from Keycloak
-    curl http://keycloak/realms/fiware-server/protocol/openid-connect/token \
+    curl http://{{ include "keycloak.fullname" . }}.{{ .Release.Namespace }}.svc/realms/fiware-server/protocol/openid-connect/token \
         -X POST \
         -H 'Accept: application/json' \
         -H 'Content-Type: application/x-www-form-urlencoded' \

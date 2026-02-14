@@ -9,7 +9,7 @@ orion-ld:
     logging:
       level: "WARN"
   deployment:
-    replicaCount: 2
+    replicaCount: 1
     resources:
       limits:
         cpu: 250m

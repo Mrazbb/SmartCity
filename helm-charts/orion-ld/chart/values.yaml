@@ -6,6 +6,7 @@ orion-ld:
       hosts:
         - mongodb-orion
       user: root
+      authSource: admin
       existingSecret:
         name: mongodb-orion
         key: mongodb-root-password

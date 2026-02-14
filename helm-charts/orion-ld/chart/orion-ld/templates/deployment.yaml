@@ -265,7 +265,10 @@ spec:
             - name: {{ .Values.broker.envPrefix }}MULTI_SERVICE
               value: {{ .Values.broker.multiserviceEnabled | upper }}
             {{- end }}
-            {{- if .Values.broker.multiserviceEnabled }}
+            {{- if .Values.broker.db.authSource }}
+            - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_SOURCE
+              value: {{ .Values.broker.db.authSource }}
+            {{- else if .Values.broker.multiserviceEnabled }}
             - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_SOURCE
               value: admin
             {{- end }}

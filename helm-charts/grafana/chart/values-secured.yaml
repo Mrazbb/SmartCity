@@ -1,0 +1,10 @@
+grafana:
+
+  extraSecretMounts:
+  - name: tsdb-password
+    mountPath: "/etc/grafana/secrets"
+    secretName: tsdb-password
+    readOnly: true
+  
+admin:
+  secured: true

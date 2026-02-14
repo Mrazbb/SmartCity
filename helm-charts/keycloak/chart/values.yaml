@@ -1,0 +1,149 @@
+realm:
+  grafana:
+    rootUrl: https://grafana
+    adminUrl: https://grafana
+    redirectUris:
+      - https://grafana/
+      - https://grafana-2/
+    webOrigins:
+      - https://grafana/
+      - https://grafana-2/
+  orionPep:
+    baseUrl: https://orion-ld
+    adminUrl: https://orion-ld
+    redirectUris:
+      - https://orion-ld/
+      - https://orion-ld-2/
+    webOrigins:
+      - https://orion-ld/
+      - https://orion-ld-2/
+
+route:
+  enabled: true
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+tests:
+  enabled: true
+  username: admin-user
+  password: admin-user
+  client_id: orion-pep
+  client_secret: 978ad148-d99b-406d-83fc-578597290a79
+
+keycloak:
+  replicaCount: 1
+  auth:
+    adminUser: fiwareAdmin
+    adminPassword: fiwareAdmin
+  serviceAccount:
+    create: true
+  rbac:
+    create: true
+    rules:
+      - apiGroups:
+        - security.openshift.io
+        resourceNames:
+        - anyuid
+        resources:
+        - securitycontextconstraints
+        verbs:
+        - use
+
+  keycloakConfigCli:
+    enabled: true
+    extraEnvVars:
+      - name: IMPORT_FILES_LOCATIONS
+        value: "/config/*"
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+    existingConfigmap: keycloak-realm
+
+  extraEnvVars:
+  - name: KEYCLOAK_PROXY_ADDRESS_FORWARDING
+    value: "true"
+  - name: KEYCLOAK_LOG_LEVEL
+    value: WARN
+
+  extraVolumeMounts:
+    - name: profiles
+      mountPath: /opt/bitnami/keycloak/conf/profile.properties
+      subPath: profile.properties
+
+  extraVolumes:
+    - name: profiles
+      configMap:
+        name: keycloak-profile
+
+  podLabels:
+    marinera/platform: fiware
+    marinera/component:	security
+    marinera/subcomponent: auth
+    marinera/product: keycloak
+
+
+  service:
+    type: ClusterIP
+
+  resources:
+    limits:
+      cpu: 7
+      memory: 2Gi
+    requests:
+      cpu: 100m
+      memory: 400Mi
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      interval: 30s
+  # -- config for setting up the alerts.
+  alerting:
+    # -- should overall alerting for keycloak be enabled?
+    enabled: true
+    ## config for enabling alerting on erronous requests
+    requestError:
+      # -- should it be enabled?
+      enabled: true
+      # -- how many failed request until the alert fires
+      threshold: 25
+      # -- timeframe to apply the threshold to
+      timeWindow: 15m
+      # -- severity of the alert
+      severity: warning
+  containerPorts:
+    management: 8080
+
+  postgresql:
+    auth:
+      username: bn_keycloak
+      password: secretpassword
+      replicationPassword: secretreplicationpassword
+    primary:
+      podSecurityContext:
+        enabled: false
+      containerSecurityContext:
+        enabled: false
+      podLabels:
+        marinera/platform: fiware
+        marinera/component:	security
+        marinera/subcomponent: persistence
+        marinera/product: postgresql
+    architecture: replication
+    readReplicas:
+      replicaCount: 1
+      podSecurityContext:
+        enabled: false
+      containerSecurityContext:
+        enabled: false
+    audit:
+      clientMinMessages: warning
+    metrics:
+      enabled: true
+      containerSecurityContext:
+        enabled: false
+      serviceMonitor:
+        enabled: true
+        interval: 30s

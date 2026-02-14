@@ -1,0 +1,120 @@
+nameOverride: "grafana"
+grafana:
+  admin:
+    existingSecret: "grafana-admin-user"
+    userKey: admin-user
+    passwordKey: admin-password
+  grafana.ini:
+    log:
+      level: warn
+    log.console:
+      format: json
+    plugins:
+      allow_loading_unsigned_plugins: orion-datasource
+    users:
+      default_theme: light # dark | light
+    auth.anonymous:
+      enabled: false
+  initChownData:
+    enabled: false
+  persistence:
+    enabled: false
+  plugins:
+    - grafana-simple-json-datasource
+    - yesoreyeram-infinity-datasource
+    - https://github.com/HOP-Ubiquitous/orion-datasource/releases/download/1.0.0/orion-datasource.zip;orion-datasource
+  rbac:
+    pspEnabled: false
+    namespaced: true
+  securityContext: ""
+
+  sidecar:
+    dashboards:
+      enabled: true
+      SCProvider: true
+      label: grafana_dashboard
+      labelValue: grafana
+      orgid: 1
+      defaultFolderName: default
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: grafana
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 10m
+        memory: 10Mi
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'dashboards'
+        orgId: 1
+        folder: 'Dashboards'
+        type: file
+        disableDeletion: true
+        editable: false
+        options:
+          path: /tmp/dashboards/dashboards  # should match sidecar.dashboards.defaultFolderName
+      - name: 'air-quality'
+        orgId: 1
+        folder: 'Air Quality'
+        type: file
+        disableDeletion: true
+        editable: false
+        options:
+          path: /tmp/dashboards/air-quality  # should match sidecar.dashboards.defaultFolderName
+
+  podLabels:
+    marinera/platform: fiware
+    marinera/component:	visualization
+    marinera/subcomponent: ui
+    marinera/product: grafana
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+  env:
+    GF_PANELS_DISABLE_SANITIZE_HTML: true
+
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 10m
+      memory: 100Mi
+
+admin:
+  secured: false
+  # -- Admin username
+  username: fiwareAdmin
+  # -- Admin password
+  password: fiwareAdmin
+
+route:
+  # -- To enable the OpenShift route
+  enabled: true
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    
+datasources:
+  orion:
+    # -- Orion URL
+    url: "http://orion-ld:1026"
+  timescale:
+    # -- Timescale URL
+    url: tsdb
+    # -- Timescale database name
+    database: postgres
+    credentials:
+      # -- Timescale database username
+      username: postgres
+      # -- Timescale database password
+      password: test
+
+tests:
+  enabled: true

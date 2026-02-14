@@ -1,0 +1,15 @@
+{{- range $path, $bytes := .Files.Glob "config/dashboards/**.json" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: air-quality-{{ base $path | replace ".json" ""}}
+  labels:
+    grafana_dashboard: grafana
+    {{- include "grafana.labels" $ | nindent 4 }}
+  annotations:
+    k8s-sidecar-target-directory: "/tmp/dashboards/air-quality" 
+data:
+  {{ base $path }}: {{ $.Files.Get $path | quote }}
+
+---
+{{- end }}

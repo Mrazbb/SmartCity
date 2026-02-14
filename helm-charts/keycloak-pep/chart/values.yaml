@@ -1,0 +1,27 @@
+replicaCount: 2
+
+image:
+  repository: docker.io/hopu/keycloak-rest-pep
+  pullPolicy: IfNotPresent
+  tag: "v18-1.1.0"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+route: 
+  enabled: true
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+resources:
+  limits:
+    cpu: 1
+    memory: 800Mi
+  requests:
+    cpu: 50m
+    memory: 300Mi
+
+log:
+  level: WARN

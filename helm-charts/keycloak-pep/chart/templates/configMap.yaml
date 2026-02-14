@@ -1,3 +1,5 @@
+{{- $defaultAuthServerUrl := printf "http://%s.%s.svc.cluster.local:%v" .Values.keycloak.serviceName .Release.Namespace .Values.keycloak.port -}}
+{{- $authServerUrl := default $defaultAuthServerUrl .Values.keycloak.authServerUrl -}}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -6,7 +8,6 @@ metadata:
   name: {{ include "keycloak-pep.fullname" . }}-config
 data:
   application.properties: >
-
     server.connection-timeout=5000
 
     server.port={{ .Values.service.port }}
@@ -21,9 +22,9 @@ data:
 
     # Keycloak PEP config
 
-    keycloak.realm=fiware-server
+    keycloak.realm={{ .Values.keycloak.realm }}
 
-    keycloak.auth-server-url=http://keycloak:80
+    keycloak.auth-server-url={{ $authServerUrl }}
 
     keycloak.ssl-required=external
 
@@ -31,11 +32,11 @@ data:
 
     keycloak.allow-any-hostname=true
 
-    keycloak.resource=orion-pep
+    keycloak.resource={{ .Values.keycloak.resource }}
 
     keycloak.bearer-only=true
 
-    keycloak.credentials.secret=978ad148-d99b-406d-83fc-578597290a79
+    keycloak.credentials.secret={{ .Values.keycloak.clientSecret }}
 
     keycloak.securityConstraints[0].authRoles[0]=user
 

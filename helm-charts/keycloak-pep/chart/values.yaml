@@ -36,3 +36,12 @@ resources:
 
 log:
   level: WARN
+
+keycloak:
+  # Optional explicit URL. If empty, it will be constructed from serviceName/port/namespace.
+  authServerUrl: ""
+  serviceName: keycloak
+  port: 80
+  realm: fiware-server
+  resource: orion-pep
+  clientSecret: 978ad148-d99b-406d-83fc-578597290a79

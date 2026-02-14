@@ -1,3 +1,6 @@
+nameOverride: "mongodb-orion"
+fullnameOverride: "mongodb-orion"
+
 mongodb:
   global:
     nameOverride: "mongodb-orion"

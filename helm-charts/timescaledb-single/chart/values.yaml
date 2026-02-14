@@ -2,6 +2,11 @@ timescaledb-single:
   patroni:
     log:
       level: WARNING
+    # Backup is disabled by default in this chart, so do not attempt pgBackRest
+    # for replica creation. Use streaming basebackup instead.
+    postgresql:
+      create_replica_methods:
+        - basebackup
     bootstrap:
       dcs:
         postgresql:

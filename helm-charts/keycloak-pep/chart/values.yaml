@@ -15,6 +15,17 @@ route:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
 
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: keycloak-pep.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
 resources:
   limits:
     cpu: 1

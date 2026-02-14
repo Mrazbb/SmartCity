@@ -5,6 +5,10 @@ image:
   pullPolicy: IfNotPresent
   tag: "v18-1.1.0"
 
+extraEnvVars:
+  - name: AB_JOLOKIA_OFF
+    value: "true"
+
 service:
   type: ClusterIP
   port: 8080

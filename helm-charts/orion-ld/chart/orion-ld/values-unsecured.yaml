@@ -1,0 +1,6 @@
+# Unsecured values: inline MongoDB password when not using existingSecret.
+# Used when secretsReady is true but secretsEnabled is false (no Sealed Secrets).
+broker:
+  db:
+    auth:
+      password: test

@@ -8,6 +8,8 @@ image:
 extraEnvVars:
   - name: AB_JOLOKIA_OFF
     value: "true"
+  - name: JAVA_OPTS_APPEND
+    value: "--add-opens=java.base/java.lang=ALL-UNNAMED"
 
 service:
   type: ClusterIP

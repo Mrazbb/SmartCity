@@ -19,7 +19,7 @@ spec:
           image: quay.io/keycloak/keycloak:18.0.0
           command: ["/bin/sh", "-c"]
           args:
-            - /opt/keycloak/bin/kc.sh import --dir /opt/keycloak/data/import && exec /opt/keycloak/bin/kc.sh start-dev
+            - exec /opt/keycloak/bin/kc.sh start-dev --import-realm
           env:
             - name: KEYCLOAK_ADMIN
               value: {{ .Values.keycloak.auth.adminUser }}

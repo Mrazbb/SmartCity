@@ -125,7 +125,7 @@ keycloak:
       # -- severity of the alert
       severity: warning
   containerPorts:
-    management: 8080
+    management: 9000
 
   postgresql:
     auth:

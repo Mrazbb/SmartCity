@@ -10,5 +10,8 @@ spec:
     - port: 80
       targetPort: 8080
       name: http
+    - port: 9000
+      targetPort: 9000
+      name: http-management
   selector:
     {{- include "keycloak.selectorLabels" . | nindent 4 }}

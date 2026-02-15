@@ -21,11 +21,11 @@ spec:
           imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
           command: ["/bin/sh", "-c"]
           args:
-            - exec /opt/keycloak/bin/kc.sh start-dev --import-realm
+            - exec /opt/keycloak/bin/kc.sh start --import-realm
           env:
-            - name: KEYCLOAK_ADMIN
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
               value: {{ .Values.keycloak.auth.adminUser }}
-            - name: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               value: {{ .Values.keycloak.auth.adminPassword }}
             # Legacy/Wildfly vars removed. Quarkus vars below.
             {{- if .Values.keycloak.extraEnvVars }}
@@ -34,17 +34,26 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: management
+              containerPort: 9000
+          startupProbe:
+            httpGet:
+              path: /health/started
+              port: management
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /health/ready
-              port: http
+              port: management
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 5
           livenessProbe:
             httpGet:
               path: /health/live
-              port: http
+              port: management
             initialDelaySeconds: 60
             periodSeconds: 10
             failureThreshold: 5

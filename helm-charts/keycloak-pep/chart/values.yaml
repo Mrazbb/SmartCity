@@ -1,15 +1,22 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
-  repository: docker.io/hopu/keycloak-rest-pep
+  repository: fiware/pep-proxy
   pullPolicy: IfNotPresent
-  tag: "v18-1.1.0"
+  tag: "8.3.0"
 
-extraEnvVars:
-  - name: AB_JOLOKIA_OFF
-    value: "true"
-  - name: JAVA_OPTS_APPEND
-    value: "--add-opens=java.base/java.lang=ALL-UNNAMED"
+config:
+  pep:
+    app_id: orion-pep
+    username: admin-user
+    password: admin-user
+  idm:
+    host: keycloak
+    port: 80
+    ssl: false
+  app:
+    host: orion-ld
+    port: 1026
 
 service:
   type: ClusterIP
@@ -41,13 +48,4 @@ resources:
     memory: 300Mi
 
 log:
-  level: WARN
-
-keycloak:
-  # Optional explicit URL. If empty, it will be constructed from serviceName/port/namespace.
-  authServerUrl: ""
-  serviceName: keycloak
-  port: 80
-  realm: fiware-server
-  resource: orion-pep
-  clientSecret: 978ad148-d99b-406d-83fc-578597290a79
+  level: DEBUG

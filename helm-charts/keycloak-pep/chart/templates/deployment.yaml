@@ -11,9 +11,8 @@ spec:
       {{- include "keycloak-pep.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      annotations:
-        checksum/configMap: {{ include (print $.Template.BasePath "/configMap.yaml") . | sha256sum }}
       {{- with .Values.podAnnotations }}
+      annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -23,44 +22,48 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- with .Values.extraEnvVars }}
           env:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            - name: PEP_PROXY_PORT
+              value: {{ .Values.service.port | quote }}
+            - name: PEP_PROXY_IDM_HOST
+              value: {{ .Values.config.idm.host | quote }}
+            - name: PEP_PROXY_IDM_PORT
+              value: {{ .Values.config.idm.port | quote }}
+            - name: PEP_PROXY_IDM_SSL_ENABLED
+              value: {{ .Values.config.idm.ssl | quote }}
+            - name: PEP_PROXY_APP_HOST
+              value: {{ .Values.config.app.host | quote }}
+            - name: PEP_PROXY_APP_PORT
+              value: {{ .Values.config.app.port | quote }}
+            - name: PEP_PROXY_APP_ID
+              value: {{ .Values.config.pep.app_id | quote }}
+            - name: PEP_PROXY_USERNAME
+              value: {{ .Values.config.pep.username | quote }}
+            - name: PEP_PROXY_PASSWORD
+              value: {{ .Values.config.pep.password | quote }}
+            - name: PEP_PROXY_AUTH_ENABLED
+              value: "true"
+            - name: PEP_PROXY_PDP
+              value: "idm"
+            - name: PEP_PROXY_MAGIC_KEY
+              value: "1234"
+            - name: PEP_PROXY_DEBUG
+              value: "true"
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
-            exec:
-              command:
-              - /bin/sh
-              - -c
-              - result=$(curl -s -i localhost:{{ .Values.service.port }} | head -1 | cut -d" " -f2) && [ "$result" = "403" ]
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: http
             initialDelaySeconds: 10
             timeoutSeconds: 5
-            periodSeconds: 5
-            successThreshold: 1
-            failureThreshold: 10
-          readinessProbe:
-            exec:
-              command:
-              - /bin/sh
-              - -c
-              - result=$(curl -s -i localhost:{{ .Values.service.port }} | head -1 | cut -d" " -f2) && [ "$result" = "403" ]
-            initialDelaySeconds: 5
-            timeoutSeconds: 5
-            periodSeconds: 5
-            successThreshold: 1
-            failureThreshold: 5
+            periodSeconds: 10
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - name: app-config
-              mountPath: "/deployments/application.properties"
-              readOnly: true
-              subPath: application.properties
-      volumes:
-        - name: app-config
-          configMap:
-            name: {{ include "keycloak-pep.fullname" . }}-config

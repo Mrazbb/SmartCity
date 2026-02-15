@@ -1,14 +1,14 @@
 apiVersion: v2
 name: keycloak-pep
-description: A Helm chart for Kubernetes to deploy a Spring Boot application that uses the PEP Keycloak library.
+description: A Helm chart for Kubernetes to deploy FIWARE PEP Proxy (Wilma).
 type: application
-version: 1.0.0
-appVersion: "v18-1.1.0"
-home: https://spring.io/projects/spring-boot
+version: 2.0.0
+appVersion: "8.3.0"
+home: https://github.com/fiware/pep-proxy
 keywords:
   - keycloak
   - pep
-  - springBoot
+  - wilma
   - Java
 sources:
   - xxx

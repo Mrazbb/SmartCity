@@ -43,6 +43,10 @@ tests:
   client_secret: 978ad148-d99b-406d-83fc-578597290a79
 
 keycloak:
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: 26.0.0
+    pullPolicy: IfNotPresent
   replicaCount: 1
   auth:
     adminUser: fiwareAdmin

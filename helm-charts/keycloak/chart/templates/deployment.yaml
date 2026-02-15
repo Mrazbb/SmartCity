@@ -27,16 +27,7 @@ spec:
               value: {{ .Values.keycloak.auth.adminUser }}
             - name: KEYCLOAK_ADMIN_PASSWORD
               value: {{ .Values.keycloak.auth.adminPassword }}
-            - name: KC_FEATURES
-              value: "scripts"
-            - name: KC_PROXY_HEADERS
-              value: "xforwarded"
-            - name: KC_HTTP_RELATIVE_PATH
-              value: "/"
-            - name: KC_HEALTH_ENABLED
-              value: "true"
-            - name: KC_METRICS_ENABLED
-              value: "true"
+            # Legacy/Wildfly vars removed. Quarkus vars below.
             {{- if .Values.keycloak.extraEnvVars }}
             {{- toYaml .Values.keycloak.extraEnvVars | nindent 12 }}
             {{- end }}

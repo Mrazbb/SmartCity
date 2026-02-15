@@ -66,21 +66,21 @@ keycloak:
         - use
 
   keycloakConfigCli:
-    enabled: true
-    extraEnvVars:
-      - name: IMPORT_FILES_LOCATIONS
-        value: "/config/*"
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
-    existingConfigmap: keycloak-realm
+    enabled: false
 
   extraEnvVars:
-  - name: KEYCLOAK_PROXY_ADDRESS_FORWARDING
+  - name: KC_PROXY
+    value: "edge"
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HTTP_ENABLED
     value: "true"
-  - name: KEYCLOAK_LOG_LEVEL
-    value: WARN
+  - name: KC_LOG_LEVEL
+    value: "INFO"
+  - name: KC_HEALTH_ENABLED
+    value: "true"
+  - name: KC_METRICS_ENABLED
+    value: "true"
 
   podLabels:
     marinera/platform: fiware

@@ -1,1 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "keycloak-pep.fullname" . }}-config
+  labels:
+    {{- include "keycloak-pep.labels" . | nindent 4 }}
+data:
+  config.js: |-
+    module.exports = {
+      config: {
+        pep_port: {{ .Values.service.port }},
+        app_host: "{{ .Values.config.app.host }}",
+        app_port: {{ .Values.config.app.port }},
+        idm_host: "{{ .Values.config.idm.host }}",
+        idm_port: {{ .Values.config.idm.port }},
+        ssl: {{ .Values.config.idm.ssl }},
+        app_id: "{{ .Values.config.pep.app_id }}",
+        username: "{{ .Values.config.pep.username }}",
+        password: "{{ .Values.config.pep.password }}",
+        debug: {{ eq (upper (.Values.log.level | default "DEBUG")) "DEBUG" }}
+      }
+    };
 

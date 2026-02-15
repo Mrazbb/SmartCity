@@ -25,6 +25,8 @@ spec:
               value: {{ .Values.keycloak.auth.adminUser }}
             - name: KEYCLOAK_ADMIN_PASSWORD
               value: {{ .Values.keycloak.auth.adminPassword }}
+            - name: KC_FEATURES
+              value: "scripts"
             - name: KC_PROXY
               value: "edge"
             - name: KC_HTTP_RELATIVE_PATH

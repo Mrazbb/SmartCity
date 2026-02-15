@@ -1,5 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
+{{- $persistence := .Values.keycloak.persistence | default dict }}
 metadata:
   name: {{ include "keycloak.fullname" . }}
   labels:
@@ -69,7 +70,7 @@ spec:
           configMap:
             name: {{ include "keycloak.name" . }}-realm
         - name: storage
-        {{- if .Values.persistence.enabled }}
+        {{- if $persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "keycloak.fullname" . }}-data
         {{- else }}

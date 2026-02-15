@@ -82,16 +82,6 @@ keycloak:
   - name: KEYCLOAK_LOG_LEVEL
     value: WARN
 
-  extraVolumeMounts:
-    - name: profiles
-      mountPath: /opt/bitnami/keycloak/conf/profile.properties
-      subPath: profile.properties
-
-  extraVolumes:
-    - name: profiles
-      configMap:
-        name: keycloak-profile
-
   podLabels:
     marinera/platform: fiware
     marinera/component:	security

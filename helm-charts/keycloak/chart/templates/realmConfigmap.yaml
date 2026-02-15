@@ -454,26 +454,6 @@ data:
             ],
             "policies": [
               {
-                "name": "fiware-headers context management v3",
-                "description": "",
-                "type": "js",
-                "logic": "POSITIVE",
-                "decisionStrategy": "UNANIMOUS",
-                "config": {
-                  "code": "var context = $evaluation.getContext();\nvar attributes = context.getAttributes();\nvar identity = context.getIdentity();\n \nif (attributes.exists('http.fiware-service') && \n    attributes.exists('http.fiware-servicepath') && \n    attributes.exists('http.method') && \n    identity.getAttributes().exists('fiware-scope-object')) {\n\n    var request_service = attributes.getValue('http.fiware-service').asString(0);\n    var request_servicepath = attributes.getValue('http.fiware-servicepath').asString(0);\n    var request_method = attributes.getValue('http.method').asString(0);\n    \n    var fiware_scopes = identity.getAttributes().getValue('fiware-scope-object');\n    var fiware_scope;\n\n    var index;\n    for (index = 0; index < fiware_scopes.size(); index++) {\n        fiware_scope = JSON.parse(fiware_scopes.asString(index));\n\n        if (fiware_scope.hasOwnProperty(\"fiware-service\") &&\n            fiware_scope[\"fiware-service\"] === request_service && \n            fiware_scope.hasOwnProperty(\"fiware-servicepath\") &&\n            fiware_scope[\"fiware-servicepath\"].equals(request_servicepath) && \n            fiware_scope.hasOwnProperty(\"orion-roles\") &&\n            ((fiware_scope[\"orion-roles\"].equals('consumer') && request_method === 'GET') ||\n             (fiware_scope[\"orion-roles\"].equals('producer') && ['POST', 'PUT', 'PATCH', 'DELETE'].indexOf(request_method) != -1))\n            ) {\n                $evaluation.grant();\n        }            \n    }\n}"
-                }
-              },
-              {
-                "name": "consumer method",
-                "description": "Comprueba que el método de la petición es el permitido para un consumer (GET)",
-                "type": "js",
-                "logic": "POSITIVE",
-                "decisionStrategy": "UNANIMOUS",
-                "config": {
-                  "code": "var context = $evaluation.getContext();\nvar attributes = context.getAttributes();\nvar identity = context.getIdentity();\n \nvar method = attributes.getValue('http.method').asString(0);\n\nif (method === 'GET') {\n    $evaluation.grant();\n}\n"
-                }
-              },
-              {
                 "name": "consumer user",
                 "description": "Comprueba que el usuario tiene rol consumer",
                 "type": "role",
@@ -490,7 +470,7 @@ data:
                 "logic": "POSITIVE",
                 "decisionStrategy": "UNANIMOUS",
                 "config": {
-                  "applyPolicies": "[\"fiware-headers context management v3\",\"consumer method\",\"consumer user\"]"
+                  "applyPolicies": "[\"consumer user\"]"
                 }
               },
 
@@ -505,22 +485,12 @@ data:
                 }
               },
               {
-                "name": "producer method",
-                "description": "Comprueba que el método de la petición es el permitido para un producer (POST, PUT, PATCH o DELETE)",
-                "type": "js",
-                "logic": "POSITIVE",
-                "decisionStrategy": "UNANIMOUS",
-                "config": {
-                  "code": "var context = $evaluation.getContext();\nvar attributes = context.getAttributes();\nvar identity = context.getIdentity();\n \nvar method = attributes.getValue('http.method').asString(0);\n\nif (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {\n    $evaluation.grant();\n}\n"
-                }
-              },
-              {
                 "name": "producer policy v3",
                 "type": "aggregate",
                 "logic": "POSITIVE",
                 "decisionStrategy": "UNANIMOUS",
                 "config": {
-                  "applyPolicies": "[\"producer user\",\"fiware-headers context management v3\",\"producer method\"]"
+                  "applyPolicies": "[\"producer user\"]"
                 }
               },
 
@@ -532,16 +502,6 @@ data:
                 "decisionStrategy": "UNANIMOUS",
                 "config": {
                   "roles": "[{\"id\":\"orion-pep/admin\",\"required\":true}]"
-                }
-              },
-
-              {
-                "name": "fiware-headers subscriptions v3",
-                "type": "js",
-                "logic": "POSITIVE",
-                "decisionStrategy": "UNANIMOUS",
-                "config": {
-                  "code": "var context = $evaluation.getContext();\nvar attributes = context.getAttributes();\nvar identity = context.getIdentity();\n \nif (attributes.exists('http.fiware-service') && \n    attributes.exists('http.fiware-servicepath') && \n    attributes.exists('http.method') && \n    identity.getAttributes().exists('fiware-scope-object')) {\n\n    var request_service = attributes.getValue('http.fiware-service').asString(0);\n    var request_servicepath = attributes.getValue('http.fiware-servicepath').asString(0);\n    var request_method = attributes.getValue('http.method').asString(0);\n    \n    var fiware_scopes = identity.getAttributes().getValue('fiware-scope-object');\n    var fiware_scope;\n\n    var index;\n    for (index = 0; index < fiware_scopes.size(); index++) {\n        fiware_scope = JSON.parse(fiware_scopes.asString(index));\n\n        if (fiware_scope.hasOwnProperty(\"fiware-service\") &&\n            fiware_scope[\"fiware-service\"] === request_service && \n            fiware_scope.hasOwnProperty(\"fiware-servicepath\") &&\n            fiware_scope[\"fiware-servicepath\"].contains(request_servicepath) && \n            fiware_scope.hasOwnProperty(\"orion-roles\") &&\n            (fiware_scope[\"orion-roles\"].contains('subscriptor') && ['GET','POST', 'PUT', 'PATCH', 'DELETE'].indexOf(request_method) != -1)) {\n            $evaluation.grant();\n        }            \n    }\n}"
                 }
               },
 
@@ -561,7 +521,7 @@ data:
                 "logic": "POSITIVE",
                 "decisionStrategy": "UNANIMOUS",
                 "config": {
-                  "applyPolicies": "[\"fiware-headers subscriptions v3\",\"subscriptor user\"]"
+                  "applyPolicies": "[\"subscriptor user\"]"
                 }
               },
 
@@ -623,23 +583,7 @@ data:
           "attributes": {
             "include.in.token.scope": "true",
             "display.on.consent.screen": "false"
-          },
-          "protocolMappers": [
-            {
-              "name": "fiware-scope-object",
-              "protocol": "openid-connect",
-              "protocolMapper": "oidc-script-based-protocol-mapper",
-              "consentRequired": false,
-              "config": {
-                "userinfo.token.claim": "true",
-                "multivalued": "true",
-                "id.token.claim": "true",
-                "access.token.claim": "true",
-                "claim.name": "fiware-scope-object",
-                "script": "/**\n * Available variables: \n * user - the current user\n * realm - the current realm\n * token - the current token\n * userSession - the current userSession\n * keycloakSession - the current userSession\n */\n\nvar ArrayList = Java.type(\"java.util.ArrayList\");\nvar fiware_scope = new ArrayList();\n\nvar forEach = Array.prototype.forEach;\n\nvar fiware_service;\nvar fiware_servicepath;\nvar fiware_entry;\nvar roles = '';\n\nvar orion_client = realm.getClientByClientId('orion-pep');\n\nfiware_service = user.getFirstAttribute('fiware-service');\nfiware_servicepath = user.getFirstAttribute('fiware-servicepath');\nif (fiware_service !== null && fiware_servicepath !== null) {\n\n    fiware_entry = {\n        \"fiware-service\": fiware_service,\n        \"fiware-servicepath\": fiware_servicepath\n    };\n\n    var roleModels = user.getClientRoleMappings(orion_client);\n    if (roleModels.size() > 0) {\n        forEach.call(\n            user.getClientRoleMappings(orion_client).toArray(),\n            function (role) {\n                roles = roles + role.getName() + \",\";\n            }\n        );\n        roles = roles.substring(0, roles.length - 1);\n        fiware_entry[\"orion-roles\"] = roles;\n        roles = '';\n    }\n\n    fiware_scope.add(JSON.stringify(fiware_entry));\n    fiware_entry = {};\n}\n\nforEach.call(\n    user.getGroups().toArray(),\n    function (group) {\n\n        fiware_service = group.getFirstAttribute('fiware-service');\n        fiware_servicepath = group.getFirstAttribute('fiware-servicepath');\n        if (fiware_service !== null && fiware_servicepath !== null) {\n            fiware_entry = {\n                \"fiware-service\": fiware_service,\n                \"fiware-servicepath\": fiware_servicepath\n            };\n\n            var roleModels = group.getClientRoleMappings(orion_client);\n            if (roleModels.size() > 0) {\n                forEach.call(\n                    group.getClientRoleMappings(orion_client).toArray(),\n                    function (role) {\n                        roles = roles + role.getName() + \",\";\n                    }\n                );\n                roles = roles.substring(0, roles.length - 1);\n                fiware_entry[\"orion-roles\"] = roles;\n                roles = '';\n            }\n\n            fiware_scope.add(JSON.stringify(fiware_entry));\n            fiware_entry = {};\n        } else if (group.getParentId() !== null) {\n            fiware_service = group.getParent().getFirstAttribute('fiware-service');\n            fiware_servicepath = group.getParent().getFirstAttribute('fiware-servicepath');\n\n            if (fiware_service !== null && fiware_servicepath !== null) {\n                fiware_entry = {\n                    \"fiware-service\": fiware_service,\n                    \"fiware-servicepath\": fiware_servicepath\n                };\n                var subroleModels = group.getClientRoleMappings(orion_client);\n                if (subroleModels.size() > 0) {\n                    forEach.call(\n                        group.getClientRoleMappings(orion_client).toArray(),\n                        function (role) {\n                            roles = roles + role.getName() + \",\";\n                        }\n                    );\n                    roles = roles.substring(0, roles.length - 1);\n                    fiware_entry[\"orion-roles\"] = roles;\n                    roles = '';\n                }\n\n                fiware_scope.add(JSON.stringify(fiware_entry));\n                fiware_entry = '';\n            }\n        }\n    }\n);\n\nexports = fiware_scope;"
-              }
-            }
-          ]
+          }
         },
         {
           "name": "offline_access",

@@ -110,6 +110,12 @@ keycloak:
       cpu: 100m
       memory: 400Mi
 
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: ""
+    accessMode: ReadWriteOnce
+
   metrics:
     enabled: true
     serviceMonitor:

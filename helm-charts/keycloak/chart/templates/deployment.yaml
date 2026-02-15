@@ -27,15 +27,18 @@ spec:
             - name: KEYCLOAK_ADMIN_PASSWORD
               value: {{ .Values.keycloak.auth.adminPassword }}
             - name: KC_FEATURES
-              value: "scripts"
-            - name: KC_PROXY
-              value: "edge"
+              value: "scripts,upload_scripts"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
             - name: KC_HTTP_RELATIVE_PATH
               value: "/"
             - name: KC_HEALTH_ENABLED
               value: "true"
             - name: KC_METRICS_ENABLED
               value: "true"
+            {{- if .Values.keycloak.extraEnvVars }}
+            {{- toYaml .Values.keycloak.extraEnvVars | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 8080
@@ -56,7 +59,22 @@ spec:
           volumeMounts:
             - name: realm-config
               mountPath: /opt/keycloak/data/import
+            - name: storage
+              mountPath: /opt/keycloak/data
+            {{- if .Values.keycloak.extraVolumeMounts }}
+            {{- toYaml .Values.keycloak.extraVolumeMounts | nindent 12 }}
+            {{- end }}
       volumes:
         - name: realm-config
           configMap:
             name: {{ include "keycloak.name" . }}-realm
+        - name: storage
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "keycloak.fullname" . }}-data
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.keycloak.extraVolumes }}
+        {{- toYaml .Values.keycloak.extraVolumes | nindent 8 }}
+        {{- end }}

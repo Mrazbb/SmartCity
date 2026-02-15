@@ -5,4 +5,3 @@ metadata:
 data:
   profile.properties: |-
     feature.scripts=enabled
-    feature.upload_scripts=enabled

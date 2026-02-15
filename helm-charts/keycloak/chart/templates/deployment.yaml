@@ -28,7 +28,7 @@ spec:
             - name: KEYCLOAK_ADMIN_PASSWORD
               value: {{ .Values.keycloak.auth.adminPassword }}
             - name: KC_FEATURES
-              value: "scripts,upload_scripts"
+              value: "scripts"
             - name: KC_PROXY_HEADERS
               value: "xforwarded"
             - name: KC_HTTP_RELATIVE_PATH

@@ -125,7 +125,7 @@ init:
       # -- specification of the image pull policy
       pullPolicy: IfNotPresent
     # -- URL of the quantum leap instance to be notified
-    quantumLeapUrl: "http://quantumleap:8668"
+    quantumLeapUrl: "http://quantumleap-quantumleap:8668"
     # -- type of the entities to be send
     entityType: "AirQualityObserved"
   ## configuration for the keycloak init-container

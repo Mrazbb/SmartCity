@@ -40,7 +40,7 @@ spec:
             - name: IOTA_MONGO_PORT
               value: "{{ .Values.config.iotaMongoPort }}"
             - name: IOTA_MONGO_DB
-              value: {{ .Values.config.iotaMongoDb }}
+              value: "{{ .Values.config.iotaMongoDb }}{{ if .Values.config.mongoAuth.enabled }}?authSource=admin{{ end }}"
             - name: IOTA_NORTH_PORT
               value: "4041"
             {{- if .Values.config.mongoAuth.enabled }}
@@ -51,8 +51,6 @@ spec:
                   key: {{ .Values.config.mongoAuth.secretKey }}
             - name: IOTA_MONGO_HOST
               value: "{{ .Values.config.mongoAuth.user }}:$(_MONGO_PASSWORD)@{{ .Values.config.iotaMongoHost }}"
-            - name: IOTA_MONGO_AUTH_SOURCE
-              value: "admin"
             {{- else }}
             - name: IOTA_MONGO_HOST
               value: {{ .Values.config.iotaMongoHost }}

@@ -1,0 +1,17 @@
+image:
+  repository: eclipse-mosquitto
+  tag: 2.0.18
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 1883
+  nodePort: 31883 # Optional if NodePort is used
+
+persistence:
+  enabled: false
+  size: 1Gi
+  storageClass: ""
+
+config:
+  allow_anonymous: true

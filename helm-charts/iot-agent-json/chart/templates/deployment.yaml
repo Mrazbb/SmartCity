@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "iot-agent-json.fullname" . }}
+  labels:
+    {{- include "iot-agent-json.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "iot-agent-json.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "iot-agent-json.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: iot-agent-json
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 4041
+              protocol: TCP
+          env:
+            - name: IOTA_LOG_LEVEL
+              value: {{ .Values.config.logLevel }}
+            - name: IOTA_DEFAULT_KEY
+              value: {{ .Values.config.defaultKey }}
+            - name: IOTA_CB_HOST
+              value: {{ .Values.config.iotaCbHost }}
+            - name: IOTA_CB_PORT
+              value: "{{ .Values.config.iotaCbPort }}"
+            - name: IOTA_MQTT_HOST
+              value: {{ .Values.config.iotaMqttHost }}
+            - name: IOTA_MQTT_PORT
+              value: "{{ .Values.config.iotaMqttPort }}"
+            - name: IOTA_REGISTRY_TYPE
+              value: {{ .Values.config.iotaRegistryType }}
+            - name: IOTA_MONGO_HOST
+              value: {{ .Values.config.iotaMongoHost }}
+            - name: IOTA_MONGO_PORT
+              value: "{{ .Values.config.iotaMongoPort }}"
+            - name: IOTA_MONGO_DB
+              value: {{ .Values.config.iotaMongoDb }}
+            - name: IOTA_NORTH_PORT
+              value: "4041"
+            {{- if .Values.config.mongoAuth.enabled }}
+            - name: IOTA_MONGO_USER
+              value: {{ .Values.config.mongoAuth.user }}
+            - name: IOTA_MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.mongoAuth.secretName }}
+                  key: {{ .Values.config.mongoAuth.secretKey }}
+            {{- end }}

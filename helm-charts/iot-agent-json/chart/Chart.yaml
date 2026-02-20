@@ -1,0 +1,6 @@
+apiVersion: v2
+name: iot-agent-json
+description: FIWARE IoT Agent for JSON
+type: application
+version: 1.0.0
+appVersion: "1.23.0"

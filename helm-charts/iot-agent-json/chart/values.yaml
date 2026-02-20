@@ -1,0 +1,33 @@
+image:
+  repository: fiware/iotagent-json
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 4041
+
+config:
+  logLevel: DEBUG
+  defaultKey: "4jggokgpepnvsb2uv4s40d59ov"
+  
+  # Context Broker
+  iotaCbHost: orion-ld
+  iotaCbPort: 1026
+  
+  # MQTT
+  iotaMqttHost: mosquitto
+  iotaMqttPort: 1883
+  
+  # MongoDB
+  iotaRegistryType: mongodb
+  iotaMongoHost: mongodb-orion
+  iotaMongoPort: 27017
+  iotaMongoDb: iotagentjson
+  
+  # Auth
+  mongoAuth:
+    enabled: true
+    user: root
+    # secretName: mongodb-orion
+    # secretKey: mongodb-root-password

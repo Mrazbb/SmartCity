@@ -37,8 +37,6 @@ spec:
               value: "{{ .Values.config.iotaMqttPort }}"
             - name: IOTA_REGISTRY_TYPE
               value: {{ .Values.config.iotaRegistryType }}
-            - name: IOTA_MONGO_HOST
-              value: {{ .Values.config.iotaMongoHost }}
             - name: IOTA_MONGO_PORT
               value: "{{ .Values.config.iotaMongoPort }}"
             - name: IOTA_MONGO_DB
@@ -46,11 +44,16 @@ spec:
             - name: IOTA_NORTH_PORT
               value: "4041"
             {{- if .Values.config.mongoAuth.enabled }}
-            - name: IOTA_MONGO_USER
-              value: {{ .Values.config.mongoAuth.user }}
-            - name: IOTA_MONGO_PASSWORD
+            - name: _MONGO_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.config.mongoAuth.secretName }}
                   key: {{ .Values.config.mongoAuth.secretKey }}
+            - name: IOTA_MONGO_HOST
+              value: "{{ .Values.config.mongoAuth.user }}:$(_MONGO_PASSWORD)@{{ .Values.config.iotaMongoHost }}"
+            - name: IOTA_MONGO_AUTH_SOURCE
+              value: "admin"
+            {{- else }}
+            - name: IOTA_MONGO_HOST
+              value: {{ .Values.config.iotaMongoHost }}
             {{- end }}

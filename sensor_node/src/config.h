@@ -28,7 +28,7 @@
 
 // Sleep Settings
 // How long the device should sleep between measurements (in minutes)
-#define SLEEP_MINUTES 1
+#define SLEEP_MINUTES 15
 
 // Retry thresholds
 #define MAX_WIFI_RETRIES 20

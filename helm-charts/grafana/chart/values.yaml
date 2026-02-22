@@ -100,7 +100,7 @@ route:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
     
-datasources:
+c:
   orion:
     # -- Orion URL
     url: "http://orion-ld:1026"

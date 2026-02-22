@@ -20,7 +20,6 @@ grafana:
   persistence:
     enabled: false
   plugins:
-    - grafana-simple-json-datasource
     - yesoreyeram-infinity-datasource
     - https://github.com/HOP-Ubiquitous/orion-datasource/releases/download/1.0.0/orion-datasource.zip;orion-datasource
   rbac:

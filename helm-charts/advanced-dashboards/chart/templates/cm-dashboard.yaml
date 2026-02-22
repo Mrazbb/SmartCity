@@ -1,0 +1,14 @@
+{{- range $path, $bytes := .Files.Glob "config/dashboards/**.json" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adv-dash-{{ base $path | replace ".json" ""}}
+  labels:
+    grafana_dashboard: grafana
+    {{- include "adv-dash.labels" $ | nindent 4 }}
+  annotations:
+    k8s-sidecar-target-directory: "/tmp/dashboards/advanced-dashboards"
+data:
+  {{ base $path }}: {{ $.Files.Get $path | quote }}
+---
+{{- end }}

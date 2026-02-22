@@ -43,6 +43,12 @@ spec:
               value: "{{ .Values.config.iotaMongoDb }}{{ if .Values.config.mongoAuth.enabled }}?authSource=admin{{ end }}"
             - name: IOTA_NORTH_PORT
               value: "4041"
+            - name: IOTA_CB_NGSI_VERSION
+              value: {{ .Values.config.iotaCbNgsiVersion | default "v2" | quote }}
+            - name: IOTA_JSON_LD_CONTEXT
+              value: {{ .Values.config.iotaJsonLdContext | default "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld" | quote }}
+            - name: IOTA_FALLBACK_TENANT
+              value: {{ .Values.config.iotaFallbackTenant | default "" | quote }}
             {{- if .Values.config.mongoAuth.enabled }}
             - name: _MONGO_PASSWORD
               valueFrom:

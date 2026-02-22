@@ -10,8 +10,8 @@
   "panels": [
     {
       "datasource": {
-        "type": "postgres",
-        "uid": "timescale-datasource"
+        "type": "ngsild-grafana-datasource",
+        "uid": "ngsild"
       },
       "fieldConfig": {
         "defaults": {
@@ -90,7 +90,7 @@
                   "mode": "fixed"
                 },
                 "text": {
-                  "field": "entity_id",
+                  "field": "id",
                   "fixed": "",
                   "mode": "field"
                 },
@@ -104,9 +104,7 @@
               }
             },
             "location": {
-              "latitude": "latitude",
-              "longitude": "longitude",
-              "mode": "coords"
+              "mode": "auto"
             },
             "name": "Sensor Locations",
             "tooltip": true,
@@ -127,12 +125,11 @@
       "targets": [
         {
           "datasource": {
-            "type": "postgres",
-            "uid": "timescale-datasource"
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
           },
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  time_index AS time,\n  entity_id,\n  co2,\n  temperature,\n  humidity,\n  ST_X(location::geometry) AS longitude,\n  ST_Y(location::geometry) AS latitude\nFROM (\n  SELECT DISTINCT ON (entity_id) *\n  FROM etairqualityobserved\n  ORDER BY entity_id, time_index DESC\n) latest_data;",
+          "queryType": "current",
+          "entityType": "AirQualityObserved",
           "refId": "A"
         }
       ],
@@ -141,8 +138,8 @@
     },
     {
       "datasource": {
-        "type": "postgres",
-        "uid": "timescale-datasource"
+        "type": "ngsild-grafana-datasource",
+        "uid": "ngsild"
       },
       "fieldConfig": {
         "defaults": {
@@ -215,12 +212,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "postgres",
-            "uid": "timescale-datasource"
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
           },
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(time_index, '1m') AS time,\n  entity_id AS metric,\n  AVG(co2) AS value\nFROM etairqualityobserved\nWHERE\n  $__timeFilter(time_index) AND co2 IS NOT NULL\nGROUP BY time, metric\nORDER BY time;",
+          "queryType": "temporal",
+          "entityType": "AirQualityObserved",
+          "attribute": "co2",
           "refId": "A"
         }
       ],
@@ -229,8 +226,8 @@
     },
     {
       "datasource": {
-        "type": "postgres",
-        "uid": "timescale-datasource"
+        "type": "ngsild-grafana-datasource",
+        "uid": "ngsild"
       },
       "fieldConfig": {
         "defaults": {
@@ -303,22 +300,22 @@
       "targets": [
         {
           "datasource": {
-            "type": "postgres",
-            "uid": "timescale-datasource"
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
           },
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(time_index, '1m') AS time,\n  entity_id || ' - Temp' AS metric,\n  AVG(temperature) AS value\nFROM etairqualityobserved\nWHERE\n  $__timeFilter(time_index) AND temperature IS NOT NULL\nGROUP BY time, metric\nORDER BY time;",
+          "queryType": "temporal",
+          "entityType": "AirQualityObserved",
+          "attribute": "temperature",
           "refId": "A"
         },
         {
           "datasource": {
-            "type": "postgres",
-            "uid": "timescale-datasource"
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
           },
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(time_index, '1m') AS time,\n  entity_id || ' - Hum' AS metric,\n  AVG(humidity) AS value\nFROM etairqualityobserved\nWHERE\n  $__timeFilter(time_index) AND humidity IS NOT NULL\nGROUP BY time, metric\nORDER BY time;",
+          "queryType": "temporal",
+          "entityType": "AirQualityObserved",
+          "attribute": "humidity",
           "refId": "B"
         }
       ],
@@ -327,8 +324,8 @@
     },
     {
       "datasource": {
-        "type": "postgres",
-        "uid": "timescale-datasource"
+        "type": "ngsild-grafana-datasource",
+        "uid": "ngsild"
       },
       "fieldConfig": {
         "defaults": {
@@ -401,37 +398,66 @@
       "targets": [
         {
           "datasource": {
-            "type": "postgres",
-            "uid": "timescale-datasource"
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
           },
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(time_index, '1m') AS time,\n  entity_id || ' - PM1' AS metric,\n  AVG(pm1) AS value\nFROM etairqualityobserved\nWHERE\n  $__timeFilter(time_index) AND pm1 IS NOT NULL\nGROUP BY time, metric\nORDER BY time;",
+          "queryType": "temporal",
+          "entityType": "AirQualityObserved",
+          "attribute": "pm1",
           "refId": "A"
         },
         {
           "datasource": {
-            "type": "postgres",
-            "uid": "timescale-datasource"
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
           },
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(time_index, '1m') AS time,\n  entity_id || ' - PM2.5' AS metric,\n  AVG(pm25) AS value\nFROM etairqualityobserved\nWHERE\n  $__timeFilter(time_index) AND pm25 IS NOT NULL\nGROUP BY time, metric\nORDER BY time;",
+          "queryType": "temporal",
+          "entityType": "AirQualityObserved",
+          "attribute": "pm25",
           "refId": "B"
         },
         {
           "datasource": {
-            "type": "postgres",
-            "uid": "timescale-datasource"
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
           },
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(time_index, '1m') AS time,\n  entity_id || ' - PM10' AS metric,\n  AVG(pm10) AS value\nFROM etairqualityobserved\nWHERE\n  $__timeFilter(time_index) AND pm10 IS NOT NULL\nGROUP BY time, metric\nORDER BY time;",
+          "queryType": "temporal",
+          "entityType": "AirQualityObserved",
+          "attribute": "pm10",
           "refId": "C"
         }
       ],
       "title": "Particulate Matter History",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "ngsild-grafana-datasource",
+        "uid": "ngsild"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 5,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
+          },
+          "queryType": "current",
+          "entityType": "AirQualityObserved",
+          "refId": "A"
+        }
+      ],
+      "title": "All Sensors Data (Live Table)",
+      "type": "table"
     }
   ],
   "refresh": "5s",

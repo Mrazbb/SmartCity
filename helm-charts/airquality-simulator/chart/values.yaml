@@ -79,8 +79,8 @@ config:
     fiwareServicePath: "/data"
     aqSimulations:
       - id: "urn:ngsi:AirQualityObserved:simulated-1"
-        longi: -1.2718119
-        lat: 38.0770502
+        longi: 19.1563278
+        lat: 48.7383681
         sampleInterval: 30
         age: 10
         name: "HOP Ubiquitous"

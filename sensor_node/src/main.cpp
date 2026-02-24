@@ -35,7 +35,11 @@ void enterSleep() {
 bool connectWiFi() {
     Serial.print("Connecting to WiFi: ");
     Serial.println(WIFI_SSID);
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    if (WIFI_PASS == NULL || strlen(WIFI_PASS) == 0) {
+        WiFi.begin(WIFI_SSID);
+    } else {
+        WiFi.begin(WIFI_SSID, WIFI_PASS);
+    }
 
     int retries = 0;
     while (WiFi.status() != WL_CONNECTED && retries < MAX_WIFI_RETRIES) {
@@ -87,13 +91,20 @@ void setup() {
     pinMode(PIN_SEN55_PWR, OUTPUT);
     digitalWrite(PIN_SEN55_PWR, HIGH);  // Turn on SEN55
     
+    // Give SEN55 time to boot up after power is applied
+    delay(1200);
+
     // 3. Initialize I2C and Sensors
-    Wire.begin(I2C_SDA, I2C_SCL);
-    sen5x.begin(Wire);
+    Wire.end(); // Force reset of I2C to ensure correct pins
+    Wire.begin(I2C_INT_SDA, I2C_INT_SCL);   // Internal I2C for SCD40 & SEN55
+    
     scd4x.begin(Wire);
+    sen5x.begin(Wire);
     
     // Start Measurements
     Serial.println("Starting sensors...");
+    scd4x.stopPeriodicMeasurement();
+    delay(500);
     scd4x.startPeriodicMeasurement();
     sen5x.startMeasurement();
 
@@ -132,6 +143,7 @@ void setup() {
         doc["pm25"] = serialized(String(pm2p5, 1));
         doc["pm10"] = serialized(String(pm10p0, 1));
         if (!isnan(voc)) doc["voc"] = serialized(String(voc, 1));
+        if (!isnan(nox)) doc["nox"] = serialized(String(nox, 1));
     }
 
     String payload;

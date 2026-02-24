@@ -29,24 +29,30 @@ This document outlines the architecture and technical design of the Smart City M
 *   **Purpose:** Create NGSI-LD subscriptions to push context data changes to external systems.
 *   **Workflow:** User defines trigger conditions (Entity Type, watched attributes) and an action (Webhook URL). NestJS posts this to Orion-LD (`/ngsi-ld/v1/subscriptions`).
 
-### 3.3. Federation Manager & Context Replication
-*   **Purpose:** Enable distributed Context Brokers to share data either through live query routing (Federation) or data copying (Replication).
+### 3.3. Subscriptions, Federation & Synchronization
+*   **Purpose:** Enable distributed Context Brokers to share data, save historical state, or physically copy data across domains.
 
-**3.3.1. True NGSI-LD Federation (Query Routing)**
-*   **Concept:** Relies on ETSI NGSI-LD **Context Source Registrations (CSR)**. Data lives on the remote broker and is queried on-demand.
-*   **Master/Subordinate Workflow:** If an Edge Broker is the "Master" of a sensor, the Central Broker uses CSR to forward queries to it. Write operations (PATCH/POST) can also be forwarded to the Master if the CSR allows it.
-*   **Workflow:** User registers the Edge Broker, NestJS creates a `ContextSourceRegistration`, and Orion-LD routes external queries/updates to the Edge Broker transparently.
+**3.3.1. Classical Subscription (Database Sync / History)**
+*   **Concept:** Used when you want to save historical state changes to a time-series database.
+*   **Workflow:** QuantumLeap creates a subscription in Orion-LD. When data enters Orion-LD, it notifies QuantumLeap, which natively understands the NGSI-LD `"Notification"` wrapper, extracts the data, and stores it into CrateDB or TimescaleDB.
 
-**3.3.2. Context Replication (Push/Notify Updates)**
-*   **Concept:** If you require data to physically reside on multiple brokers ("when a value is changed it notifies other brokers"), this is achieved via **Subscriptions**.
-*   **Read-Only Replica Pattern:** The "Master" broker holds the mutable entity. A Subscription is created on the Master broker targeting the `/ngsi-ld/v1/op/update` endpoint of a "Replica" broker. Any change on the Master automatically pushes the new state to the Replica. 
-*   **Enforcing Master:** To ensure data is *only* modified on the Master, Kong API Gateway on the Replica broker is configured to deny `POST/PATCH/DELETE` requests for replicated entities, making the Replica effectively read-only.
+**3.3.2. Context Federation (Real-Time External Fetch)**
+*   **Concept:** Relies on ETSI NGSI-LD **Context Source Registrations (CSR)**. A central Context Broker acts as a federator, routing queries dynamically to external brokers without moving all the data centrally.
+*   **Workflow:** User registers the Edge Broker, NestJS creates a `ContextSourceRegistration`, and Orion-LD routes external queries/updates to the Edge Broker transparently. Write operations (PATCH/POST) can also be forwarded to the Master if the CSR allows it.
+
+**3.3.3. One-Way Sync (Physical Data Replication)**
+*   **Concept:** Physically copy data from one broker to another automatically using **Subscriptions**. Ideal for pushing selected data to a secondary broker (e.g., Municipality to University).
+*   **Workflow:** The "Master" broker holds the mutable entity. A Subscription is created on the Master broker targeting an "Unwrapper" middleware. This middleware is strictly required because Orion-LD sends a `"Notification"` wrapper, but the receiving broker's `/ngsi-ld/v1/entityOperations/upsert` endpoint requires a JSON Array. The middleware extracts the `"data"` array and forwards it. To ensure data is only modified on the Master, Kong API Gateway on the Replica is configured to deny manual `POST/PATCH/DELETE` for replicated entities.
 
 ### 3.4. Identity, Security & Access Management (OIDC & UMA)
 *   **Purpose:** Treat every NGSI-LD Entity as a protected resource using Keycloak User-Managed Access (UMA) to define strictly what a user owns and what they can modify.
 *   **Entity Ownership:** When a user creates an entity, their ID is stored as `owner_id` in `tbl_entity`. The owner automatically receives full Keycloak scopes (`read`, `write`, `delete`).
 *   **Access Grants:** 3rd-party apps or other users are given OIDC Client IDs. The owner can grant specific scopes (e.g., `read` only, preventing modification).
 *   **Enforcement Workflow:** When a request hits the system (e.g., `PATCH /ngsi-ld/v1/entities/urn:ngsi-ld:Device:001`), Kong API Gateway intercepts it, validates the OIDC token against Keycloak, and checks if the token possesses the `write` scope for that specific entity's UMA resource. If not, Kong blocks the request with a 403 Forbidden before it ever reaches Orion-LD.
+
+### 3.5. Application Data Management (Grouping)
+*   **Purpose:** Logically group digital twin assets for easier management, batch operations, and bulk-assignment.
+*   **Workflow:** The UI provides a dynamic form to create new groups (stored in `tbl_entity_group`). Users can construct custom queries and apply filters based on entity `type` (e.g., `StreetLight`) or `location` (e.g., drawing a bounding box on a map) to selectively bulk-assign entities into the group (tracked in `mtm_entity_entity_group`).
 
 ---
 
@@ -72,11 +78,6 @@ enum Enum_EntityVisibility {
   PUBLIC = 'PUBLIC',         // Open data, readable by anyone
   PRIVATE = 'PRIVATE',       // Only owner and explicitly granted apps can read
   FEDERATED = 'FEDERATED'    // Shared with specific federated brokers
-}
-
-enum Enum_RegistrationType {
-  SUBSCRIPTION = 'SUBSCRIPTION', // Data pushed outward
-  CSOURCE = 'CSOURCE'            // Distributed query federation
 }
 ```
 
@@ -122,17 +123,27 @@ Stores credentials and endpoints for other Context Brokers in the federated netw
 *   `tenant_header` (VARCHAR, Nullable) - NGSI-Tenant header if needed.
 *   `auth_token_encrypted` (VARCHAR, Nullable) - Token to access the remote broker.
 
-**5. `tbl_ngsi_registration`**
-Tracks both Subscriptions (data out) and Context Source Registrations (federation query routing).
+**5. `tbl_csource_registration`**
+Tracks Context Source Registrations (federation query routing) for real-time external fetches.
 *   `id` (UUID, Primary Key)
 *   `ngsi_registration_id` (VARCHAR) - ID returned by Orion-LD upon creation.
-*   `type` (Enum_RegistrationType) - Subscriptions vs CSource.
 *   `federation_target_id` (UUID, Nullable, Foreign Key -> `tbl_federation_target.id`)
 *   `entity_type_filter` (VARCHAR) - e.g., `Vehicle`
 *   `endpoint_url` (VARCHAR)
 *   `owner_id` (UUID, Foreign Key -> `tbl_user.id`)
 
-**6. `tbl_external_app`**
+**6. `tbl_subscription`**
+A relational table acting as the application's management layer for NGSI-LD subscriptions (Historical DB Sync, One-Way Sync).
+*   `id` (UUID, Primary Key)
+*   `ngsi_subscription_id` (VARCHAR) - ID returned by Orion-LD upon creation.
+*   `description` (VARCHAR)
+*   `entity_type_filter` (VARCHAR) - e.g., `WasteContainer`
+*   `notification_endpoint` (VARCHAR) - The webhook URL, QuantumLeap, or Unwrapper middleware URL.
+*   `owner_id` (UUID, Foreign Key -> `tbl_user.id`)
+*   `active` (BOOLEAN)
+*   `created_at` (TIMESTAMP)
+
+**7. `tbl_external_app`**
 Stores 3rd party applications built by developers that request access to city data.
 *   `id` (UUID, Primary Key)
 *   `developer_id` (UUID, Foreign Key -> `tbl_user.id`)
@@ -141,7 +152,7 @@ Stores 3rd party applications built by developers that request access to city da
 *   `description` (TEXT)
 *   `webhook_url` (VARCHAR, Nullable)
 
-**7. `tbl_app_access_grant`**
+**8. `tbl_app_access_grant`**
 Tracks UMA policies. When an Entity Owner grants a 3rd party App access to their sensor.
 *   `id` (UUID, Primary Key)
 *   `app_id` (UUID, Foreign Key -> `tbl_external_app.id`)
@@ -150,11 +161,25 @@ Tracks UMA policies. When an Entity Owner grants a 3rd party App access to their
 *   `granted_scopes` (JSONB) - e.g., `["read", "write"]`
 *   `granted_at` (TIMESTAMP)
 
+**9. `tbl_entity_group`**
+Stores group definitions and metadata for logical grouping of entities (e.g., "Downtown Streetlights").
+*   `id` (UUID, Primary Key)
+*   `name` (VARCHAR)
+*   `description` (TEXT)
+*   `owner_id` (UUID, Foreign Key -> `tbl_user.id`)
+*   `created_at` (TIMESTAMP)
+
+**10. `mtm_entity_entity_group`**
+A many-to-many mapping table linking specific NGSI-LD entities to their respective groups.
+*   `entity_id` (UUID, Foreign Key -> `tbl_entity.id`)
+*   `group_id` (UUID, Foreign Key -> `tbl_entity_group.id`)
+*   `assigned_at` (TIMESTAMP)
+
 ---
 
 ## 5. System Orchestration Logic (NestJS Services)
 *   **IotAgentService:** Manages `tbl_device_config` and orchestrates calls to FIWARE IoT Agents.
-*   **OrionLdService:** Wrapper for all Orion-LD communications.
+*   **OrionLdService:** Wrapper for all Orion-LD communications. Includes support for Batch Upsert operations (`/ngsi-ld/v1/entityOperations/upsert`) to bulk create or overwrite entities efficiently.
 *   **FederationService:** Handles the translation of `tbl_federation_target` configurations into `ContextSourceRegistration` payloads applied via the `OrionLdService`.
 *   **KeycloakAdminService:** Reacts to entity creation/deletion. Uses `@keycloak/keycloak-admin-client` to dynamically provision users, clients, resources, and map UMA policies tracked in `tbl_app_access_grant`.
 *   **KongAdminService:** Interacts with Kong's Admin API to dynamically apply OIDC/UMA plugins to specific `/ngsi-ld/v1/entities/{id}` API routes.
@@ -162,5 +187,5 @@ Tracks UMA policies. When an Entity Owner grants a 3rd party App access to their
 ## 6. Development Phasing
 *   **Phase 1 - Scaffold:** Setup Nx workspace, NestJS, React, TypeORM schemas (`tbl_*`), and oRPC.
 *   **Phase 2 - Core IoT:** Implement Device Manager (Input -> `tbl_device_config` -> IoT Agent -> Orion-LD). Connect Smart Data Models API to UI.
-*   **Phase 3 - True Federation:** Implement the Federation UI. Map `tbl_federation_target` entries to NGSI-LD Context Source Registrations (`/csourceRegistrations`) on the broker.
+*   **Phase 3 - True Federation & Sync:** Implement the Federation and Subscriptions UI. Map `tbl_federation_target` entries to NGSI-LD Context Source Registrations (`/csourceRegistrations`), and manage `tbl_subscription` for One-Way Syncs (via Unwrapper) and Historical syncs (via QuantumLeap).
 *   **Phase 4 - Security (Hardest):** Implement Keycloak lifecycle. Map `tbl_entity` creation to Keycloak Resource creation. Build UI for `tbl_app_access_grant` (giving 3rd party apps OIDC access to specific sensors).

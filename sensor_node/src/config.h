@@ -5,7 +5,7 @@
 // ==========================================
 
 // WiFi Settings
-#define WIFI_SSID "Slow WIFI IoT"
+#define WIFI_SSID "dd-wrt"
 #define WIFI_PASS NULL
 
 // MQTT Settings

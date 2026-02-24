@@ -78,6 +78,8 @@ bool connectMQTT() {
 void setup() {
     // 1. Initialize M5Stack (keeps power alive via internal M5 logic if applicable)
     auto cfg = M5.config();
+    cfg.external_display_value = 0;
+    cfg.clear_display = false;
     M5.begin(cfg);
     Serial.begin(115200);
     delay(1000);

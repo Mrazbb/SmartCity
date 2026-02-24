@@ -23,7 +23,7 @@ This document outlines the architecture and technical design of the Smart City M
 
 ### 3.1. Device & Entity Management (IoT & Smart Data Models)
 *   **Purpose:** Allow users to seamlessly onboard new sensors and map them to official Smart Data Models.
-*   **Workflow:** User selects the input protocol and the Smart Data Model entity type (populated dynamically from `tbl_data_model`). The backend fetches the linked JSON Schema from `tbl_data_model` to generate a configuration form and validate inputs. The user maps hardware payload keys to NGSI-LD properties. For MQTT devices, the user can optionally provide per-device MQTT credentials (username/password) if the broker requires them. NestJS provisions the device via the FIWARE IoT Agent API.
+*   **Workflow:** User selects the input protocol and the Smart Data Model entity type. The backend dynamically generates a configuration form based on the model's JSON Schema. The user maps hardware payload keys to NGSI-LD properties. For MQTT devices, the user can optionally provide per-device MQTT credentials (username/password) if the broker requires them. NestJS provisions the device via the FIWARE IoT Agent API.
 
 ### 3.2. Subscription & Notification Engine
 *   **Purpose:** Create NGSI-LD subscriptions to push context data changes to external systems.
@@ -42,8 +42,7 @@ This document outlines the architecture and technical design of the Smart City M
 
 **3.3.3. One-Way Sync (Physical Data Replication)**
 *   **Concept:** Physically copy data from one broker to another automatically using **Subscriptions**. Ideal for pushing selected data to a secondary broker (e.g., Municipality to University).
-*   **Workflow:** The "Master" broker holds the mutable entity. A Subscription is created on the Master broker targeting an "Unwrapper" middleware. This middleware is strictly required because Orion-LD sends a `"Notification"` wrapper, but the receiving broker's `/ngsi-ld/v1/entityOperations/upsert` endpoint requires a JSON Array. The middleware extracts the `"data"` array and forwards it. To ensure data is only modified on the Master, Kong API Gateway on the Replica is configured to deny manual `POST/PATCH/DELETE` for replicated entities.
-
+*   **Workflow:** The "Master" broker holds the mutable entity. A Subscription is created on the Master broker targeting an "Unwrapper" middleware. This middleware is strictly required because Orion-LD sends a `"Notification"` wrapper, but the receiving broker's `/ngsi-ld/v1/entityOperations/upsert` endpoint requires a JSON Array. The middleware extracts the `"data"` array and forwards it. To ensure data is only modified on the Master, Kong API Gateway on the Replica is configured to deny manual `POST/PATCH/DELETE` for replicated entitie
 ### 3.4. Identity, Security & Access Management (OIDC & UMA)
 *   **Purpose:** Treat every NGSI-LD Entity as a protected resource using Keycloak User-Managed Access (UMA) to define strictly what a user owns and what they can modify.
 *   **Entity Ownership:** When a user creates an entity, their ID is stored as `ownerId` in `tbl_entity`. The owner automatically receives full Keycloak scopes (`read`, `write`, `delete`).
@@ -92,25 +91,18 @@ Stores portal users (synced/linked with Keycloak).
 *   `role` (Enum_UserRole)
 *   `createdAt` (TIMESTAMP)
 
-**2. `tbl_data_model`**
-Stores the allowed Smart Data Models. Used to populate frontend dropdown menus and provide JSON schemas for dynamic form generation and payload validation.
-*   `id` (UUID, Primary Key)
-*   `type` (VARCHAR, Unique) - e.g., `AirQualityObserved`, `StreetLight`
-*   `jsonSchemaUrl` (VARCHAR) - URL to the official FIWARE/Smart Data Models JSON Schema.
-*   `description` (TEXT, Nullable)
-*   `active` (BOOLEAN) - Enables/disables the model in the UI dropdowns.
-
-**3. `tbl_entity`**
+**2. `tbl_entity`**
 Stores portal metadata for NGSI-LD entities. (The actual real-time state lives in Orion-LD).
 *   `id` (UUID, Primary Key)
 *   `ngsiLdUrn` (VARCHAR, Unique) - e.g., `urn:ngsi-ld:AirQualityObserved:001`
-*   `dataModelId` (UUID, Foreign Key -> `tbl_data_model.id`) - Links to the defined Smart Data Model.
+*   `entityType` (VARCHAR) - e.g., `AirQualityObserved`
 *   `ownerId` (UUID, Foreign Key -> `tbl_user.id`)
+*   `smartDataModelUrl` (VARCHAR, Nullable) - Link to schema used.
 *   `keycloakResourceId` (VARCHAR) - ID of the UMA resource generated in Keycloak.
 *   `visibility` (Enum_EntityVisibility)
 *   `createdAt` (TIMESTAMP)
 
-**4. `tbl_device_config`**
+**3. `tbl_device_config`**
 Stores hardware to NGSI-LD mapping parameters for the IoT Agents.
 *   `id` (UUID, Primary Key)
 *   `entityId` (UUID, Foreign Key -> `tbl_entity.id`)
@@ -122,7 +114,7 @@ Stores hardware to NGSI-LD mapping parameters for the IoT Agents.
 *   `mqttPasswordEncrypted` (VARCHAR, Nullable) - Per-device MQTT password (AES-256 encrypted).
 *   `active` (BOOLEAN)
 
-**5. `tbl_federation_target`**
+**4. `tbl_federation_target`**
 Stores credentials and endpoints for other Context Brokers in the federated network.
 *   `id` (UUID, Primary Key)
 *   `organizationName` (VARCHAR)
@@ -130,7 +122,7 @@ Stores credentials and endpoints for other Context Brokers in the federated netw
 *   `tenantHeader` (VARCHAR, Nullable) - NGSI-Tenant header if needed.
 *   `authTokenEncrypted` (VARCHAR, Nullable) - Token to access the remote broker.
 
-**6. `tbl_csource_registration`**
+**5. `tbl_csource_registration`**
 Tracks Context Source Registrations (federation query routing) for real-time external fetches.
 *   `id` (UUID, Primary Key)
 *   `ngsiRegistrationId` (VARCHAR) - ID returned by Orion-LD upon creation.
@@ -139,7 +131,7 @@ Tracks Context Source Registrations (federation query routing) for real-time ext
 *   `endpointUrl` (VARCHAR)
 *   `ownerId` (UUID, Foreign Key -> `tbl_user.id`)
 
-**7. `tbl_subscription`**
+**6. `tbl_subscription`**
 A relational table acting as the application's management layer for NGSI-LD subscriptions (Historical DB Sync, One-Way Sync).
 *   `id` (UUID, Primary Key)
 *   `ngsiSubscriptionId` (VARCHAR) - ID returned by Orion-LD upon creation.
@@ -150,7 +142,7 @@ A relational table acting as the application's management layer for NGSI-LD subs
 *   `active` (BOOLEAN)
 *   `createdAt` (TIMESTAMP)
 
-**8. `tbl_external_app`**
+**7. `tbl_external_app`**
 Stores 3rd party applications built by developers that request access to city data.
 *   `id` (UUID, Primary Key)
 *   `developerId` (UUID, Foreign Key -> `tbl_user.id`)
@@ -159,7 +151,7 @@ Stores 3rd party applications built by developers that request access to city da
 *   `description` (TEXT)
 *   `webhookUrl` (VARCHAR, Nullable)
 
-**9. `tbl_app_access_grant`**
+**8. `tbl_app_access_grant`**
 Tracks UMA policies. When an Entity Owner grants a 3rd party App access to their sensor.
 *   `id` (UUID, Primary Key)
 *   `appId` (UUID, Foreign Key -> `tbl_external_app.id`)
@@ -168,7 +160,7 @@ Tracks UMA policies. When an Entity Owner grants a 3rd party App access to their
 *   `grantedScopes` (JSONB) - e.g., `["read", "write"]`
 *   `grantedAt` (TIMESTAMP)
 
-**10. `tbl_entity_group`**
+**9. `tbl_entity_group`**
 Stores group definitions and metadata for logical grouping of entities (e.g., "Downtown Streetlights").
 *   `id` (UUID, Primary Key)
 *   `name` (VARCHAR)
@@ -176,7 +168,7 @@ Stores group definitions and metadata for logical grouping of entities (e.g., "D
 *   `ownerId` (UUID, Foreign Key -> `tbl_user.id`)
 *   `createdAt` (TIMESTAMP)
 
-**11. `mtm_entity_entity_group`**
+**10. `mtm_entity_entity_group`**
 A many-to-many mapping table linking specific NGSI-LD entities to their respective groups.
 *   `entityId` (UUID, Foreign Key -> `tbl_entity.id`)
 *   `groupId` (UUID, Foreign Key -> `tbl_entity_group.id`)
@@ -185,7 +177,6 @@ A many-to-many mapping table linking specific NGSI-LD entities to their respecti
 ---
 
 ## 5. System Orchestration Logic (NestJS Services)
-*   **DataModelService:** Serves the `tbl_data_model` entries to the UI for dropdowns and fetches the associated JSON schemas to validate incoming payload mappings.
 *   **IotAgentService:** Manages `tbl_device_config` and orchestrates calls to FIWARE IoT Agents.
 *   **OrionLdService:** Wrapper for all Orion-LD communications. Includes support for Batch Upsert operations (`/ngsi-ld/v1/entityOperations/upsert`) to bulk create or overwrite entities efficiently.
 *   **FederationService:** Handles the translation of `tbl_federation_target` configurations into `ContextSourceRegistration` payloads applied via the `OrionLdService`.

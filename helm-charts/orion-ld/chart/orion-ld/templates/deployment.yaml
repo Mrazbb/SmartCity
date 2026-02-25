@@ -50,7 +50,9 @@ spec:
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
           {{ if .Values.broker.noDevTrace }}
-          args: ["-lmtmp"]
+          args:["-fg", "-multiservice", "-ngsiv1Autocast", "-lmtmp"]
+          {{- else }}
+          args: ["-fg", "-multiservice", "-ngsiv1Autocast"]
           {{- end }}
           # special handling for the health check of telefonica/orion and json log format
           {{ if or (eq .Values.broker.envPrefix "ORION_") (.Values.broker.logging.jsonformat) }}

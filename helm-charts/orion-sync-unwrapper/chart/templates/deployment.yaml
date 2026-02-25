@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "orion-sync-unwrapper.fullname" . }}
+  labels:
+    {{- include "orion-sync-unwrapper.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "orion-sync-unwrapper.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "orion-sync-unwrapper.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python", "-u", "/app/unwrapper.py"]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: script-volume
+              mountPath: /app/unwrapper.py
+              subPath: unwrapper.py
+      volumes:
+        - name: script-volume
+          configMap:
+            name: {{ include "orion-sync-unwrapper.fullname" . }}-script

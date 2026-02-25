@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: python
+  pullPolicy: IfNotPresent
+  tag: "3.9-alpine"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: "traefik"
+  annotations: {}
+  hosts:
+    - host: unwrapper.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific

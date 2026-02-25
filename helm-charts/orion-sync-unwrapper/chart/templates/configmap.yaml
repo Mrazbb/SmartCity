@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "orion-sync-unwrapper.fullname" . }}-script
+  labels:
+    {{- include "orion-sync-unwrapper.labels" . | nindent 4 }}
+data:
+  unwrapper.py: |
+    import urllib.request, json
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    class DynamicUnwrapper(BaseHTTPRequestHandler):
+        def do_POST(self):
+            try:
+                target_base_url = self.path.lstrip('/')
+                if not target_base_url.startswith('http'):
+                    print("Error: Invalid or missing target URL provided in path (must start with http/https).")
+                    self.send_response(400); self.end_headers(); return
+
+                length = int(self.headers.get('Content-Length', 0))
+                payload = json.loads(self.rfile.read(length))
+                
+                entities = payload.get('data',[])
+                if not entities:
+                    self.send_response(204); self.end_headers(); return
+
+                remote_context = 'https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.3.jsonld'
+                url = f'{target_base_url.rstrip("/")}/ngsi-ld/v1/entityOperations/upsert'
+                
+                print(f"Routing {len(entities)} entities to -> {url}")
+
+                req = urllib.request.Request(
+                    url, 
+                    data=json.dumps(entities).encode('utf-8'),
+                    headers={
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/ld+json',
+                        'Link': f'<{remote_context}>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"'
+                    },
+                    method='POST'
+                )
+                
+                with urllib.request.urlopen(req) as response:
+                    print(f"Success! Remote status: {response.status}")
+                
+                self.send_response(200); self.end_headers()
+            except Exception as e:
+                print(f"Error: {e}"); self.send_response(500); self.end_headers()
+
+    print("Dynamic Unwrapper listening on port 8080...")
+    HTTPServer(('', 8080), DynamicUnwrapper).serve_forever()

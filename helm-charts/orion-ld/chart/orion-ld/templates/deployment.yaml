@@ -50,7 +50,7 @@ spec:
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
           {{ if .Values.broker.noDevTrace }}
-          args:["-fg", "-multiservice", "-ngsiv1Autocast", "-lmtmp"]
+          args: ["-fg", "-multiservice", "-ngsiv1Autocast", "-lmtmp"]
           {{- else }}
           args: ["-fg", "-multiservice", "-ngsiv1Autocast"]
           {{- end }}

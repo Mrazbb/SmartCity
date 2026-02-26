@@ -125,7 +125,7 @@ spec:
             - name: {{ .Values.broker.envPrefix }}DISABLE_FILE_LOG
               value: "TRUE"
             - name: {{ .Values.broker.envPrefix }}CACHED_CONTEXT_DIRECTORY
-              value: {{ .Values.broker.cachedContextFolder }}
+              value: {{ .Values.broker.cachedContextFolder | quote }}
             {{- if and (eq .Values.broker.ipv4enabled true) (eq .Values.broker.ipv6enabled false) }}
             - name: {{ .Values.broker.envPrefix }}USEIPV4
               value: "TRUE"
@@ -136,27 +136,27 @@ spec:
             {{- end }}
             {{- if .Values.broker.httpTimeout }}
             - name: {{ .Values.broker.envPrefix }}HTTP_TIMEOUT
-              value: {{ .Values.broker.httpTimeout }}
+              value: {{ .Values.broker.httpTimeout | quote }}
             {{- end }}
             {{- if .Values.broker.reqTimeout }}
             - name: {{ .Values.broker.envPrefix }}REQ_TIMEOUT
-              value: {{ .Values.broker.reqTimeout }}
+              value: {{ .Values.broker.reqTimeout | quote }}
             {{- end }}
             {{- if .Values.broker.corsOrigin }}
             - name: {{ .Values.broker.envPrefix }}CORS_ALLOWED_ORIGIN
-              value: {{ .Values.broker.corsOrigin }}
+              value: {{ .Values.broker.corsOrigin | quote }}
             {{- end }}
             {{- if .Values.broker.corsMaxAge }}
             - name: {{ .Values.broker.envPrefix }}CORS_MAX_AGE
-              value: {{ .Values.broker.corsMaxAge }}
+              value: {{ .Values.broker.corsMaxAge | quote }}
             {{- end }}
             {{- if .Values.broker.mutexPolicy }}
             - name: {{ .Values.broker.envPrefix }}MUTEX_POLICY
-              value: {{ .Values.broker.mutexPolicy }}
+              value: {{ .Values.broker.mutexPolicy | quote }}
             {{- end }}
             {{- if .Values.broker.cprForwardLimit }}
             - name: {{ .Values.broker.envPrefix }}CPR_FORWARD_LIMIT
-              value: {{ .Values.broker.cprForwardLimit }}
+              value: {{ .Values.broker.cprForwardLimit | quote }}
             {{- end }}
             {{- if .Values.broker.subCacheIval }}
             - name: {{ .Values.broker.envPrefix }}SUBCACHE_IVAL
@@ -164,11 +164,11 @@ spec:
             {{- end }}
             {{- if .Values.broker.noCache }}
             - name: {{ .Values.broker.envPrefix }}NOCACHE
-              value: {{ .Values.broker.noCache | upper | quote }}
+              value: {{ printf "%v" .Values.broker.noCache | upper | quote }}
             {{- end }}
             {{- if .Values.broker.connectionMemory }}
             - name: {{ .Values.broker.envPrefix }}CONN_MEMORY
-              value: {{ .Values.broker.connectionMemory }}
+              value: {{ .Values.broker.connectionMemory | quote }}
             {{- end }}
             {{- if .Values.broker.maxConnections }}
             - name: {{ .Values.broker.envPrefix }}MAX_CONN
@@ -180,54 +180,54 @@ spec:
             {{- end }}
             {{- if .Values.broker.inReqPayloadMaxSize }}
             - name: {{ .Values.broker.envPrefix }}IN_REQ_PAYLOAD_MAX_SIZE
-              value: {{ .Values.broker.inReqPayloadMaxSize }}
+              value: {{ .Values.broker.inReqPayloadMaxSize | quote }}
             {{- end }}
             {{- if .Values.broker.outReqMsgMaxSize }}
             - name: {{ .Values.broker.envPrefix }}OUT_REQ_MSG_MAX_SIZE
-              value: {{ .Values.broker.outReqMsgMaxSize }}
+              value: {{ .Values.broker.outReqMsgMaxSize | quote }}
             {{- end }}
             {{- if .Values.broker.notificationMode }}
             - name: {{ .Values.broker.envPrefix }}NOTIF_MODE
-              value: {{ .Values.broker.notificationMode }}
+              value: {{ .Values.broker.notificationMode | quote }}
             {{- end }}
             {{- if .Values.broker.notificationFlowControl }}
             - name: {{ .Values.broker.envPrefix }}NOTIF_FLOW_CONTROL
-              value: {{ .Values.broker.notificationFlowControl }}
+              value: {{ .Values.broker.notificationFlowControl | quote }}
             {{- end }}
             {{- if .Values.broker.simulatedNotification }}
             - name: {{ .Values.broker.envPrefix }}DROP_NOTIF
-              value: {{ .Values.broker.simulatedNotification }}
+              value: {{ .Values.broker.simulatedNotification | quote }}
             {{- end }}
             {{- if .Values.broker.disableCustomNotifications }}
             - name: {{ .Values.broker.envPrefix }}DISABLE_CUSTOM_NOTIF
-              value: {{ .Values.broker.disableCustomNotifications | upper }}
+              value: {{ printf "%v" .Values.broker.disableCustomNotifications | upper | quote }}
             {{- end }}
             {{- if .Values.broker.insecureNotifEnabled }}
             - name: {{ .Values.broker.envPrefix }}INSECURE_NOTIF
-              value: {{ .Values.broker.insecureNotifEnabled | upper }}
+              value: {{ printf "%v" .Values.broker.insecureNotifEnabled | upper | quote }}
             {{- end }}
             {{- if .Values.broker.forwardingEnabled }}
             - name: {{ .Values.broker.envPrefix }}FORWARDING
-              value: {{ .Values.broker.forwardingEnabled | quote | upper }}
+              value: {{ printf "%v" .Values.broker.forwardingEnabled | upper | quote }}
             {{- end }}
 
             # db
             - name: {{ .Values.broker.envPrefix }}MONGO_HOST
               {{- if .Values.mongo.enabled }}
-              value: {{ include "orion.fullname" . }}-mongo:27017
+              value: "{{ include "orion.fullname" . }}-mongo:27017"
               {{- else }}
-              value: {{ join "," .Values.broker.db.hosts }}
+              value: {{ join "," .Values.broker.db.hosts | quote }}
               {{- end }}
             - name: {{ .Values.broker.envPrefix }}MONGO_DB
-              value: {{ .Values.broker.db.name }}
+              value: {{ .Values.broker.db.name | quote }}
             {{ $numHosts := len .Values.broker.db.hosts }}
             {{- if gt $numHosts 1 -}}
             - name: {{ .Values.broker.envPrefix }}MONGO_REPLICA_SET
-              value: {{ .Values.broker.db.replicaSet }}
+              value: {{ .Values.broker.db.replicaSet | quote }}
             {{- end }}
             {{- if .Values.broker.db.existingSecret }}
             - name: {{ .Values.broker.envPrefix }}MONGO_USER
-              value: {{ .Values.broker.db.user }}
+              value: {{ .Values.broker.db.user | quote }}
             - name: {{ .Values.broker.envPrefix }}MONGO_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -236,7 +236,7 @@ spec:
             {{- end }}
             {{- if .Values.broker.db.auth }}
             - name: {{ .Values.broker.envPrefix }}MONGO_USER
-              value: {{ .Values.broker.db.user }}
+              value: {{ .Values.broker.db.user | quote }}
             - name: {{ .Values.broker.envPrefix }}MONGO_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -244,16 +244,16 @@ spec:
                   key: dbPassword
               {{- if .Values.broker.db.auth.mech }}
             - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_MECH
-              value: {{ .Values.broker.db.auth.mech }}
+              value: {{ .Values.broker.db.auth.mech | quote }}
               {{- end }}
             {{- end }}
             {{- if .Values.broker.db.sslEnabled }}
             - name: {{ .Values.broker.envPrefix }}MONGO_SSL
-              value: {{ .Values.broker.db.sslEnabled | upper }}
+              value: {{ printf "%v" .Values.broker.db.sslEnabled | upper | quote }}
             {{- end }}
             {{- if .Values.broker.db.timeout }}
             - name: {{ .Values.broker.envPrefix }}MONGO_TIMEOUT
-              value: {{ .Values.broker.db.timeout }}
+              value: {{ .Values.broker.db.timeout | quote }}
             {{- end }}
             {{- if .Values.broker.db.poolSize }}
             - name: {{ .Values.broker.envPrefix }}MONGO_POOL_SIZE
@@ -261,20 +261,20 @@ spec:
             {{- end }}
              {{- if .Values.broker.db.writeConcern }}
             - name: {{ .Values.broker.envPrefix }}MONGO_WRITE_CONCERN
-              value: {{ .Values.broker.db.writeConcern }}
+              value: {{ .Values.broker.db.writeConcern | quote }}
             {{- end }}
 
             # tenancy
             {{- if .Values.broker.multiserviceEnabled }}
             - name: {{ .Values.broker.envPrefix }}MULTI_SERVICE
-              value: {{ .Values.broker.multiserviceEnabled | upper }}
+              value: {{ printf "%v" .Values.broker.multiserviceEnabled | upper | quote }}
             {{- end }}
             {{- if .Values.broker.db.authSource }}
             - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_SOURCE
-              value: {{ .Values.broker.db.authSource }}
+              value: {{ .Values.broker.db.authSource | quote }}
             {{- else if .Values.broker.multiserviceEnabled }}
             - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_SOURCE
-              value: admin
+              value: "admin"
             {{- end }}
 
             # metrics
@@ -306,18 +306,18 @@ spec:
 
             # logging
             - name: {{ .Values.broker.envPrefix }}LOG_LEVEL
-              value: {{ .Values.broker.logging.level }}
+              value: {{ .Values.broker.logging.level | quote }}
             {{- if .Values.broker.logging.dir }}
             - name: {{ .Values.broker.envPrefix }}LOG_DIR
-              value: {{ .Values.broker.logging.dir }}
+              value: {{ .Values.broker.logging.dir | quote }}
             {{- end }}
             {{- if .Values.broker.logging.append }}
             - name: {{ .Values.broker.envPrefix }}LOG_APPEND
-              value: {{ .Values.broker.logging.append }}
+              value: {{ .Values.broker.logging.append | quote }}
             {{- end }}
             {{- if .Values.broker.logging.trace }}
             - name: {{ .Values.broker.envPrefix }}TRACE
-              value: {{ .Values.broker.logging.trace }}
+              value: {{ .Values.broker.logging.trace | quote }}
             {{- end }}
             {{- if .Values.broker.logging.summaryPeriod }}
             - name: {{ .Values.broker.envPrefix }}LOG_SUMMARY_PERIOD
@@ -325,19 +325,19 @@ spec:
             {{- end }}
             {{- if .Values.broker.logging.relogAlarms }}
             - name: {{ .Values.broker.envPrefix }}RELOG_ALARMS
-              value: {{ .Values.broker.logging.relogAlarms | upper }}
+              value: {{ printf "%v" .Values.broker.logging.relogAlarms | upper | quote }}
             {{- end }}
             {{- if .Values.broker.logging.forHumans }}
             - name: {{ .Values.broker.envPrefix }}LOG_FOR_HUMANS
-              value: {{ .Values.broker.logging.forHumans | upper }}
+              value: {{ printf "%v" .Values.broker.logging.forHumans | upper | quote }}
             {{- end }}
             {{- if .Values.broker.logging.lineMaxSize }}
             - name: {{ .Values.broker.envPrefix }}LOG_LINE_MAX_SIZE
-              value: {{ .Values.broker.logging.lineMaxSize }}
+              value: {{ .Values.broker.logging.lineMaxSize | quote }}
             {{- end }}
             {{- if .Values.broker.logging.infoPayloadMaxSize }}
             - name: {{ .Values.broker.envPrefix }}LOG_INFO_PAYLOAD_MAX_SIZE
-              value: {{ .Values.broker.logging.infoPayloadMaxSize }}
+              value: {{ .Values.broker.logging.infoPayloadMaxSize | quote }}
             {{- end }}
 
             ##TROE
@@ -351,15 +351,15 @@ spec:
             {{- end -}}
             {{ if .Values.broker.troe.dbUser }}
             - name: {{ .Values.broker.envPrefix }}TROE_USER
-              value: {{ .Values.broker.troe.dbUser }}
+              value: {{ .Values.broker.troe.dbUser | quote }}
             {{ end }}
             {{ if .Values.broker.troe.dbPassword }}
             - name: {{ .Values.broker.envPrefix }}TROE_PWD
-              value: {{ .Values.broker.troe.dbPassword }}
+              value: {{ .Values.broker.troe.dbPassword | quote }}
             {{ end }}
             {{ if .Values.broker.troe.dbHost }}
             - name: {{ .Values.broker.envPrefix }}TROE_HOST
-              value: {{ .Values.broker.troe.dbHost }}
+              value: {{ .Values.broker.troe.dbHost | quote }}
             {{ end }}
             {{ if .Values.broker.troe.dbPort }}
             - name: {{ .Values.broker.envPrefix }}TROE_PORT

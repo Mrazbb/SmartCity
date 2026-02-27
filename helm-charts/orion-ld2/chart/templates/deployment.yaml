@@ -256,7 +256,7 @@ spec:
             {{- end }}
             {{- if .Values.broker.multiserviceEnabled }}
             - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_SOURCE
-              value: admin
+              value: authSource=admin
             {{- end }}
             
             # metrics

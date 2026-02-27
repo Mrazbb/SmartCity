@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "orion.fullname" . }}
+  namespace: {{ $.Release.Namespace | quote }}
   labels:
     {{ include "orion.labels" . | nindent 4 }}
 spec:
@@ -24,79 +25,59 @@ spec:
         {{- with .Values.deployment.additionalLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{ if .Values.deployment.additionalAnnotations -}}
+      {{ if or .Values.broker.prometheus.scrape .Values.deployment.additionalAnnotations -}}
       annotations:
+        {{- if .Values.broker.prometheus.scrape }}
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8000'
+        {{- end }}
         {{- with .Values.deployment.additionalAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- end }}
-    spec:
+    spec: 
       serviceAccountName: {{ include "orion.serviceAccountName" . }}
+      {{- if .Values.deployment.initContainers }}
+      initContainers:
+        {{- with .Values.deployment.initContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
       containers:
-        {{- if eq .Values.broker.metrics.enabled  "true" }}
-        - name: {{ .Chart.Name }}-metrics
-          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
-          image: "quay.io/prometheuscommunity/json-exporter:v0.4.0"
-          args: ["--config.file=/etc/config/config.yml"]
-          ports:
-            - name: http-metrics
-              containerPort: 7979
-              protocol: TCP
-          volumeMounts:
-            - name: json-exporter-config
-              mountPath: /etc/config
-        {{ end }}
         - name: {{ .Chart.Name }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
-          # special handling for the health check of telefonica/orion and json log format
-          {{ if or (eq .Values.broker.envPrefix "ORION_") (.Values.broker.logging.jsonformat) }}
-          command:
-            - "/bin/bash"
-            - "-c"
-            {{ if and  (eq .Values.broker.envPrefix "ORION_") (.Values.broker.logging.jsonformat) }}
-            - "/usr/bin/contextBroker -fg | sed '/SUMMARY/w /tmp/healthcheck' | /scripts/logstojson.sh "
-            {{ else if eq .Values.broker.envPrefix "ORION_" }}
-            - "/usr/bin/contextBroker -fg | sed '/SUMMARY/w /tmp/healthcheck'"
-            {{ else if .Values.broker.noDevTrace }}
-            - "orionld -fg -multiservice -ngsiv1Autocast -lmtmp | /scripts/logstojson.sh"
-            {{ else }}
-            - "orionld -fg -multiservice -ngsiv1Autocast | /scripts/logstojson.sh"
-            {{ end }}
-          {{ else }}
-          {{- if .Values.broker.noDevTrace }}
-          args:
-            - "-lmtmp"
-          {{- end }}
+          {{ if and (.Values.broker.noDevTrace) (eq .Values.deployment.image.repository "fiware/orion-ld") }}
+          args: ["-lmtmp"]
+          {{ end }}
+          # special handling for the health check of telefonica/orion
+          {{ if eq .Values.broker.envPrefix "ORION_" }}
+          command: ["/bin/bash", "-c", "/usr/bin/contextBroker -fg | sed '/SUMMARY/w /tmp/healthcheck'"]
           {{ end }}
           ports:
             - name: http
               containerPort: {{ .Values.broker.port}}
               protocol: TCP
-          {{ if eq .Values.broker.envPrefix "ORIONLD_" }}
-          startupProbe:
-            httpGet:
-              path: /version
-              port: {{ .Values.broker.port }}
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            failureThreshold: 120
-            timeoutSeconds: 5
+            {{- if .Values.broker.prometheus.enabled }}
+            - name: metrics
+              containerPort: 8000
+              protocol: TCP
+            {{- end }}
+          {{ if eq .Values.deployment.image.repository "fiware/orion-ld" }}
           readinessProbe:
-            httpGet:
-              path: /version
-              port: {{ .Values.broker.port }}
+            tcpSocket:
+              port: 1027
             initialDelaySeconds: {{ .Values.deployment.readinessProbe.initialDelaySeconds}}
             periodSeconds: {{ .Values.deployment.readinessProbe.periodSeconds}}
             successThreshold: {{ .Values.deployment.readinessProbe.successThreshold }}
             timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
           livenessProbe:
-            httpGet:
-              path: /version
-              port: {{ .Values.broker.port }}
+            tcpSocket:
+              port: 1027
             initialDelaySeconds: {{ .Values.deployment.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.deployment.livenessProbe.periodSeconds }}
             successThreshold: {{ .Values.deployment.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.deployment.livenessProbe.failureThreshold }}
             timeoutSeconds: {{ .Values.deployment.livenessProbe.timeoutSeconds }}
           {{ end }}
           # special handling for the health check of telefonica/orion
@@ -110,6 +91,7 @@ spec:
             initialDelaySeconds: {{ .Values.deployment.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.deployment.readinessProbe.periodSeconds }}
             successThreshold: {{ .Values.deployment.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.deployment.readinessProbe.failureThreshold }}
             timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
           livenessProbe:
             exec:
@@ -120,6 +102,7 @@ spec:
             initialDelaySeconds: {{ .Values.deployment.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.deployment.livenessProbe.periodSeconds }}
             successThreshold: {{ .Values.deployment.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.deployment.livenessProbe.failureThreshold }}
             timeoutSeconds: {{ .Values.deployment.livenessProbe.timeoutSeconds }}
           {{ end }}
           env:
@@ -133,7 +116,7 @@ spec:
             - name: {{ .Values.broker.envPrefix }}DISABLE_FILE_LOG
               value: "TRUE"
             - name: {{ .Values.broker.envPrefix }}CACHED_CONTEXT_DIRECTORY
-              value: {{ .Values.broker.cachedContextFolder | quote }}
+              value: {{ .Values.broker.cachedContextFolder }}
             {{- if and (eq .Values.broker.ipv4enabled true) (eq .Values.broker.ipv6enabled false) }}
             - name: {{ .Values.broker.envPrefix }}USEIPV4
               value: "TRUE"
@@ -144,39 +127,39 @@ spec:
             {{- end }}
             {{- if .Values.broker.httpTimeout }}
             - name: {{ .Values.broker.envPrefix }}HTTP_TIMEOUT
-              value: {{ .Values.broker.httpTimeout | quote }}
+              value: {{ .Values.broker.httpTimeout }}
             {{- end }}
             {{- if .Values.broker.reqTimeout }}
             - name: {{ .Values.broker.envPrefix }}REQ_TIMEOUT
-              value: {{ .Values.broker.reqTimeout | quote }}
+              value: {{ .Values.broker.reqTimeout }}
             {{- end }}
             {{- if .Values.broker.corsOrigin }}
             - name: {{ .Values.broker.envPrefix }}CORS_ALLOWED_ORIGIN
-              value: {{ .Values.broker.corsOrigin | quote }}
+              value: {{ .Values.broker.corsOrigin }}
             {{- end }}
             {{- if .Values.broker.corsMaxAge }}
             - name: {{ .Values.broker.envPrefix }}CORS_MAX_AGE
-              value: {{ .Values.broker.corsMaxAge | quote }}
+              value: {{ .Values.broker.corsMaxAge }}
             {{- end }}
             {{- if .Values.broker.mutexPolicy }}
             - name: {{ .Values.broker.envPrefix }}MUTEX_POLICY
-              value: {{ .Values.broker.mutexPolicy | quote }}
-            {{- end }}
+              value: {{ .Values.broker.mutexPolicy }}
+            {{- end }}     
             {{- if .Values.broker.cprForwardLimit }}
             - name: {{ .Values.broker.envPrefix }}CPR_FORWARD_LIMIT
-              value: {{ .Values.broker.cprForwardLimit | quote }}
+              value: {{ .Values.broker.cprForwardLimit }}
             {{- end }}
             {{- if .Values.broker.subCacheIval }}
             - name: {{ .Values.broker.envPrefix }}SUBCACHE_IVAL
-              value: {{ .Values.broker.subCacheIval | quote }}
+              value: {{ .Values.broker.subCacheIval }}
             {{- end }}
             {{- if .Values.broker.noCache }}
             - name: {{ .Values.broker.envPrefix }}NOCACHE
-              value: {{ printf "%v" .Values.broker.noCache | upper | quote }}
+              value: {{ .Values.broker.noCache | upper | quote }}
             {{- end }}
             {{- if .Values.broker.connectionMemory }}
             - name: {{ .Values.broker.envPrefix }}CONN_MEMORY
-              value: {{ .Values.broker.connectionMemory | quote }}
+              value: {{ .Values.broker.connectionMemory }}
             {{- end }}
             {{- if .Values.broker.maxConnections }}
             - name: {{ .Values.broker.envPrefix }}MAX_CONN
@@ -188,80 +171,70 @@ spec:
             {{- end }}
             {{- if .Values.broker.inReqPayloadMaxSize }}
             - name: {{ .Values.broker.envPrefix }}IN_REQ_PAYLOAD_MAX_SIZE
-              value: {{ .Values.broker.inReqPayloadMaxSize | quote }}
+              value: {{ .Values.broker.inReqPayloadMaxSize }}
             {{- end }}
             {{- if .Values.broker.outReqMsgMaxSize }}
             - name: {{ .Values.broker.envPrefix }}OUT_REQ_MSG_MAX_SIZE
-              value: {{ .Values.broker.outReqMsgMaxSize | quote }}
+              value: {{ .Values.broker.outReqMsgMaxSize }}
             {{- end }}
             {{- if .Values.broker.notificationMode }}
             - name: {{ .Values.broker.envPrefix }}NOTIF_MODE
-              value: {{ .Values.broker.notificationMode | quote }}
+              value: {{ .Values.broker.notificationMode }}
             {{- end }}
             {{- if .Values.broker.notificationFlowControl }}
             - name: {{ .Values.broker.envPrefix }}NOTIF_FLOW_CONTROL
-              value: {{ .Values.broker.notificationFlowControl | quote }}
+              value: {{ .Values.broker.notificationFlowControl }}
             {{- end }}
             {{- if .Values.broker.simulatedNotification }}
             - name: {{ .Values.broker.envPrefix }}DROP_NOTIF
-              value: {{ .Values.broker.simulatedNotification | quote }}
+              value: {{ .Values.broker.simulatedNotification }}
             {{- end }}
             {{- if .Values.broker.disableCustomNotifications }}
             - name: {{ .Values.broker.envPrefix }}DISABLE_CUSTOM_NOTIF
-              value: {{ printf "%v" .Values.broker.disableCustomNotifications | upper | quote }}
+              value: {{ .Values.broker.disableCustomNotifications | upper }}
             {{- end }}
             {{- if .Values.broker.insecureNotifEnabled }}
             - name: {{ .Values.broker.envPrefix }}INSECURE_NOTIF
-              value: {{ printf "%v" .Values.broker.insecureNotifEnabled | upper | quote }}
+              value: {{ .Values.broker.insecureNotifEnabled | upper }}
             {{- end }}
             {{- if .Values.broker.forwardingEnabled }}
             - name: {{ .Values.broker.envPrefix }}FORWARDING
-              value: {{ printf "%v" .Values.broker.forwardingEnabled | upper | quote }}
+              value: {{ .Values.broker.forwardingEnabled | quote | upper }}
             {{- end }}
 
             # db
             - name: {{ .Values.broker.envPrefix }}MONGO_HOST
               {{- if .Values.mongo.enabled }}
-              value: "{{ include "orion.fullname" . }}-mongo:27017"
+              value: {{ include "orion.fullname" . }}-mongo:27017
               {{- else }}
-              value: {{ join "," .Values.broker.db.hosts | quote }}
+              value: {{ join "," .Values.broker.db.hosts }}
               {{- end }}
             - name: {{ .Values.broker.envPrefix }}MONGO_DB
-              value: {{ .Values.broker.db.name | quote }}
-            {{ $numHosts := len .Values.broker.db.hosts }}
-            {{- if gt $numHosts 1 -}}
+              value: {{ .Values.broker.db.name }}
+            {{- if .Values.broker.db.replicaSetEnabled }}
             - name: {{ .Values.broker.envPrefix }}MONGO_REPLICA_SET
-              value: {{ .Values.broker.db.replicaSet | quote }}
-            {{- end }}
-            {{- if .Values.broker.db.existingSecret }}
-            - name: {{ .Values.broker.envPrefix }}MONGO_USER
-              value: {{ .Values.broker.db.user | quote }}
-            - name: {{ .Values.broker.envPrefix }}MONGO_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.broker.db.existingSecret.name }}
-                  key: {{ .Values.broker.db.existingSecret.key }}
-            {{- end }}
+              value: {{ .Values.broker.db.replicaSet }}
+             {{- end }}
             {{- if .Values.broker.db.auth }}
             - name: {{ .Values.broker.envPrefix }}MONGO_USER
-              value: {{ .Values.broker.db.user | quote }}
+              value: {{ .Values.broker.db.auth.user }}
             - name: {{ .Values.broker.envPrefix }}MONGO_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "orion.fullname" . }}
-                  key: dbPassword
-              {{- if .Values.broker.db.auth.mech }}
+                  name: {{ include "orion.secretName" . }}
+                  key: {{ include "orion.secretKey" . }}
+              {{- if .Values.broker.db.auth.mech }} 
             - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_MECH
-              value: {{ .Values.broker.db.auth.mech | quote }}
+              value: {{ .Values.broker.db.auth.mech }}
               {{- end }}
             {{- end }}
             {{- if .Values.broker.db.sslEnabled }}
             - name: {{ .Values.broker.envPrefix }}MONGO_SSL
-              value: {{ printf "%v" .Values.broker.db.sslEnabled | upper | quote }}
+              value: {{ .Values.broker.db.sslEnabled | upper }}
             {{- end }}
             {{- if .Values.broker.db.timeout }}
             - name: {{ .Values.broker.envPrefix }}MONGO_TIMEOUT
-              value: {{ .Values.broker.db.timeout | quote }}
+              value: {{ .Values.broker.db.timeout }}
             {{- end }}
             {{- if .Values.broker.db.poolSize }}
             - name: {{ .Values.broker.envPrefix }}MONGO_POOL_SIZE
@@ -269,22 +242,23 @@ spec:
             {{- end }}
              {{- if .Values.broker.db.writeConcern }}
             - name: {{ .Values.broker.envPrefix }}MONGO_WRITE_CONCERN
-              value: {{ .Values.broker.db.writeConcern | quote }}
+              value: {{ .Values.broker.db.writeConcern }}
+            {{- end }}
+            {{- if .Values.broker.db.mongocOnly }}
+            - name: {{ .Values.broker.envPrefix }}MONGOCONLY
+              value: "TRUE"
             {{- end }}
 
             # tenancy
             {{- if .Values.broker.multiserviceEnabled }}
             - name: {{ .Values.broker.envPrefix }}MULTI_SERVICE
-              value: {{ printf "%v" .Values.broker.multiserviceEnabled | upper | quote }}
+              value: {{ .Values.broker.multiserviceEnabled | quote | upper }}
             {{- end }}
-            {{- if .Values.broker.db.authSource }}
+            {{- if .Values.broker.multiserviceEnabled }}
             - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_SOURCE
-              value: {{ .Values.broker.db.authSource | quote }}
-            {{- else if .Values.broker.multiserviceEnabled }}
-            - name: {{ .Values.broker.envPrefix }}MONGO_AUTH_SOURCE
-              value: "admin"
+              value: admin
             {{- end }}
-
+            
             # metrics
             {{ if .Values.broker.metrics  }}
             {{ if eq .Values.broker.metrics.enabled "false"  }}
@@ -294,38 +268,50 @@ spec:
             - name: {{ .Values.broker.envPrefix }}DISABLE_METRICS
               value: "FALSE"
             {{- end }}
-            {{ if .Values.broker.metrics.statCountersEnabled  }}
+            {{ if .Values.broker.metrics.statCountersEnabled }}
             - name: {{ .Values.broker.envPrefix }}STAT_COUNTERS
-              value: {{ printf "%t" .Values.broker.metrics.statCountersEnabled | upper | quote }}
+              value: "TRUE"
+            {{ else }}
+            - name: {{ .Values.broker.envPrefix }}STAT_COUNTERS
+              value: "FALSE"
             {{ end }}
             {{ if .Values.broker.metrics.statSemWaitEnabled }}
             - name: {{ .Values.broker.envPrefix }}STAT_SEM_WAIT
-              value: {{ printf "%t" .Values.broker.metrics.statSemWaitEnabled | upper | quote }}
+              value: "TRUE"
+            {{ else }}
+            - name: {{ .Values.broker.envPrefix }}STAT_SEM_WAIT
+              value: "FALSE"
             {{- end }}
             {{ if .Values.broker.metrics.statTimingEnabled }}
             - name: {{ .Values.broker.envPrefix }}STAT_TIMING
-              value: {{ printf "%t" .Values.broker.metrics.statTimingEnabled | upper | quote }}
+              value: "TRUE"
+            {{ else }}
+            - name: {{ .Values.broker.envPrefix }}STAT_TIMING
+              value: "FALSE"            
             {{- end }}
             {{ if .Values.broker.metrics.statNotifQueueEnabled }}
             - name: {{ .Values.broker.envPrefix }}STAT_NOTIF_QUEUE
-              value: {{ printf "%t" .Values.broker.metrics.statNotifQueueEnabled | upper | quote }}
+              value: "TRUE"
+            {{ else }}
+            - name: {{ .Values.broker.envPrefix }}STAT_NOTIF_QUEUE
+              value: "FALSE"               
             {{- end }}
             {{- end }}
 
             # logging
             - name: {{ .Values.broker.envPrefix }}LOG_LEVEL
-              value: {{ .Values.broker.logging.level | quote }}
+              value: {{ .Values.broker.logging.level }}
             {{- if .Values.broker.logging.dir }}
             - name: {{ .Values.broker.envPrefix }}LOG_DIR
-              value: {{ .Values.broker.logging.dir | quote }}
+              value: {{ .Values.broker.logging.dir }}
             {{- end }}
             {{- if .Values.broker.logging.append }}
             - name: {{ .Values.broker.envPrefix }}LOG_APPEND
-              value: {{ .Values.broker.logging.append | quote }}
+              value: {{ .Values.broker.logging.append }}
             {{- end }}
             {{- if .Values.broker.logging.trace }}
             - name: {{ .Values.broker.envPrefix }}TRACE
-              value: {{ .Values.broker.logging.trace | quote }}
+              value: {{ .Values.broker.logging.trace }}
             {{- end }}
             {{- if .Values.broker.logging.summaryPeriod }}
             - name: {{ .Values.broker.envPrefix }}LOG_SUMMARY_PERIOD
@@ -333,19 +319,19 @@ spec:
             {{- end }}
             {{- if .Values.broker.logging.relogAlarms }}
             - name: {{ .Values.broker.envPrefix }}RELOG_ALARMS
-              value: {{ printf "%v" .Values.broker.logging.relogAlarms | upper | quote }}
-            {{- end }}
+              value: {{ .Values.broker.logging.relogAlarms | upper }}
+            {{- end }} 
             {{- if .Values.broker.logging.forHumans }}
             - name: {{ .Values.broker.envPrefix }}LOG_FOR_HUMANS
-              value: {{ printf "%v" .Values.broker.logging.forHumans | upper | quote }}
+              value: {{ .Values.broker.logging.forHumans | upper }}
             {{- end }}
             {{- if .Values.broker.logging.lineMaxSize }}
             - name: {{ .Values.broker.envPrefix }}LOG_LINE_MAX_SIZE
-              value: {{ .Values.broker.logging.lineMaxSize | quote }}
+              value: {{ .Values.broker.logging.lineMaxSize }}
             {{- end }}
             {{- if .Values.broker.logging.infoPayloadMaxSize }}
             - name: {{ .Values.broker.envPrefix }}LOG_INFO_PAYLOAD_MAX_SIZE
-              value: {{ .Values.broker.logging.infoPayloadMaxSize | quote }}
+              value: {{ .Values.broker.logging.infoPayloadMaxSize }}
             {{- end }}
 
             ##TROE
@@ -359,15 +345,15 @@ spec:
             {{- end -}}
             {{ if .Values.broker.troe.dbUser }}
             - name: {{ .Values.broker.envPrefix }}TROE_USER
-              value: {{ .Values.broker.troe.dbUser | quote }}
+              value: {{ .Values.broker.troe.dbUser }}
             {{ end }}
             {{ if .Values.broker.troe.dbPassword }}
             - name: {{ .Values.broker.envPrefix }}TROE_PWD
-              value: {{ .Values.broker.troe.dbPassword | quote }}
+              value: {{ .Values.broker.troe.dbPassword }}
             {{ end }}
             {{ if .Values.broker.troe.dbHost }}
             - name: {{ .Values.broker.envPrefix }}TROE_HOST
-              value: {{ .Values.broker.troe.dbHost | quote }}
+              value: {{ .Values.broker.troe.dbHost }}
             {{ end }}
             {{ if .Values.broker.troe.dbPort }}
             - name: {{ .Values.broker.envPrefix }}TROE_PORT
@@ -383,30 +369,10 @@ spec:
       {{- if .Values.deployment.sidecars }}
         {{- toYaml .Values.deployment.sidecars | nindent 8 }}
       {{- end }}
-          {{- if .Values.broker.logging.jsonformat }}
-          volumeMounts:
-            - name: jsonconvert-script
-              mountPath: /scripts/
-          {{- end }}
-
+      {{- if .Values.deployment.volumes }}
       volumes:
-        {{- if eq .Values.broker.metrics.enabled  "true" }}
-        - name: json-exporter-config
-          configMap:
-            name:  {{ include "orion.fullname" . }}-json-exporter-config
-        {{end}}
-      {{- if or .Values.deployment.volumes .Values.broker.logging.jsonformat }}
-        {{- if .Values.deployment.volumes }}
         {{- toYaml .Values.deployment.volumes | nindent 8 }}
-        {{- end }}
-        {{- if .Values.broker.logging.jsonformat }}
-        - name: jsonconvert-script
-          configMap:
-            name: {{ include "orion.fullname" . }}-jsonconvert-script
-            defaultMode: 360
-        {{- end }}
       {{- end }}
-
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -419,3 +385,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      

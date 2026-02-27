@@ -76,28 +76,25 @@ spec:
           {{ if eq .Values.broker.envPrefix "ORIONLD_" }}
           startupProbe:
             httpGet:
-              path: /version
-              port: {{ .Values.broker.port }}
-            initialDelaySeconds: 30
+              path: /health/started
+              port: management
+            initialDelaySeconds: 20
             periodSeconds: 10
-            failureThreshold: 120
-            timeoutSeconds: 5
+            failureThreshold: 30
           readinessProbe:
             httpGet:
-              path: /version
-              port: {{ .Values.broker.port }}
-            initialDelaySeconds: {{ .Values.deployment.readinessProbe.initialDelaySeconds}}
-            periodSeconds: {{ .Values.deployment.readinessProbe.periodSeconds}}
-            successThreshold: {{ .Values.deployment.readinessProbe.successThreshold }}
-            timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
+              path: /health/ready
+              port: management
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 5
           livenessProbe:
             httpGet:
-              path: /version
-              port: {{ .Values.broker.port }}
-            initialDelaySeconds: {{ .Values.deployment.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.deployment.livenessProbe.periodSeconds }}
-            successThreshold: {{ .Values.deployment.livenessProbe.successThreshold }}
-            timeoutSeconds: {{ .Values.deployment.livenessProbe.timeoutSeconds }}
+              path: /health/live
+              port: management
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 5
           {{ end }}
           # special handling for the health check of telefonica/orion
           {{ if eq .Values.broker.envPrefix "ORION_" }}

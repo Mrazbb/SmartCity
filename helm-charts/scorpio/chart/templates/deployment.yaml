@@ -35,19 +35,19 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: DBHOST
-              value: {{ include "scorpioBroker-aaio.fullname" . }}-postgres
+              value: {{ if .Values.postgresql.enabled }}"{{ include "scorpioBroker-aaio.fullname" . }}-postgres"{{ else }}"{{ .Values.postgresql.host }}"{{ end }}
             - name: DBPORT
-              value: "5432"
+              value: "{{ .Values.postgresql.port }}"
             - name: DBUSER
-              value: "ngb"
+              value: "{{ .Values.postgresql.user }}"
             - name: DBPASS
-              value: "ngb"
+              value: "{{ .Values.postgresql.password }}"
             - name: DBNAME
-              value: "ngb"
+              value: "{{ .Values.postgresql.database }}"
             - name: QUARKUS_DATASOURCE_JDBC_URL
-              value: "jdbc:postgresql://{{ include "scorpioBroker-aaio.fullname" . }}-postgres:5432/ngb?ApplicationName=aio-runner"
+              value: "jdbc:postgresql://{{ if .Values.postgresql.enabled }}{{ include "scorpioBroker-aaio.fullname" . }}-postgres{{ else }}{{ .Values.postgresql.host }}{{ end }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}?ApplicationName=aio-runner"
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
-              value: "postgresql://{{ include "scorpioBroker-aaio.fullname" . }}-postgres:5432/ngb?ApplicationName=aio-runner"
+              value: "postgresql://{{ if .Values.postgresql.enabled }}{{ include "scorpioBroker-aaio.fullname" . }}-postgres{{ else }}{{ .Values.postgresql.host }}{{ end }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}?ApplicationName=aio-runner"
           ports:
             - containerPort: 9090
               protocol: TCP

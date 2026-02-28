@@ -4,6 +4,14 @@
 
 replicaCount: 1
 
+postgresql:
+  enabled: true
+  host: ""
+  port: 5432
+  user: "ngb"
+  password: "ngb"
+  database: "ngb"
+
 image:
   repository: scorpiobroker/all-in-one-runner
   pullPolicy: IfNotPresent

@@ -20,6 +20,7 @@
 // Hardware Pins (M5Stack Air Quality SKU:K131)
 #define PIN_POWER_HOLD 46
 #define PIN_SEN55_PWR 10
+#define PIN_USER_BUTTON_POWER 42
 
 // External I2C (Grove)
 #define I2C_EXT_SDA 13
@@ -35,7 +36,10 @@
 
 // Sleep Settings
 // How long the device should sleep between measurements (in minutes)
-#define SLEEP_MINUTES 15
+#define SLEEP_MINUTES 5
+
+// In milliseconds
+#define SLEEP_MS (SLEEP_MINUTES * 60 * 1000)
 
 // Retry thresholds
 #define MAX_WIFI_RETRIES 20

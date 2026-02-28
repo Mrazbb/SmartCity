@@ -20,12 +20,17 @@ void enterSleep() {
     // Stop sensors
     scd4x.stopPeriodicMeasurement();
     sen5x.stopMeasurement();
-    
-    // Use M5Unified's built-in RTC sleep (wakes up via RTC IRQ)
-    M5.Power.timerSleep(SLEEP_MINUTES);
-    
-    // Fallback: Release power hold to shut down completely (if running on battery)
+
+    // Release power hold to shut down completely (if running on battery)
+    // The device hardware will turn off if not connected to USB
+    digitalWrite(PIN_SEN55_PWR, HIGH);
+    digitalWrite(PIN_USER_BUTTON_POWER, LOW);
     digitalWrite(PIN_POWER_HOLD, LOW);
+
+    // If connected to USB, power won't turn off, so we need to use deep sleep
+    // M5.Power.timerSleep does not always work reliably for K131 module
+    Serial.println("Entering ESP32 Deep Sleep...");
+    delay(500); // Allow serial to flush
     
     // ESP32 Deep Sleep fallback
     esp_sleep_enable_timer_wakeup(SLEEP_MINUTES * 60 * 1000000ULL);
@@ -78,20 +83,26 @@ bool connectMQTT() {
 void setup() {
     // 1. Initialize M5Stack (keeps power alive via internal M5 logic if applicable)
     auto cfg = M5.config();
+    // cfg.internal_display = false; // (Not available in this version of M5Unified)
     cfg.external_display_value = 0;
     cfg.clear_display = false;
     M5.begin(cfg);
     Serial.begin(115200);
     delay(1000);
 
+    // Ensure power is held BEFORE we start doing anything else
+    // This is required for the K131 module to stay on when on battery
+    pinMode(PIN_POWER_HOLD, OUTPUT);
+    digitalWrite(PIN_POWER_HOLD, HIGH);
+
     Serial.println("--- Air Quality Sensor Booting ---");
 
     // 2. Hardware Power Management (Crucial for SKU:K131)
-    pinMode(PIN_POWER_HOLD, OUTPUT);
-    digitalWrite(PIN_POWER_HOLD, HIGH); // Maintain power
-    
+    pinMode(PIN_USER_BUTTON_POWER, OUTPUT);
+    digitalWrite(PIN_USER_BUTTON_POWER, HIGH); // Turn on User Button Power (often required for I2C pullups or 5V boost)
+
     pinMode(PIN_SEN55_PWR, OUTPUT);
-    digitalWrite(PIN_SEN55_PWR, HIGH);  // Turn on SEN55
+    digitalWrite(PIN_SEN55_PWR, LOW);  // Turn on SEN55
     
     // Give SEN55 time to boot up after power is applied
     delay(1200);
@@ -100,13 +111,18 @@ void setup() {
     Wire.end(); // Force reset of I2C to ensure correct pins
     Wire.begin(I2C_INT_SDA, I2C_INT_SCL);   // Internal I2C for SCD40 & SEN55
     
+    // Initialize external I2C for Grove port
+    Wire1.begin(I2C_EXT_SDA, I2C_EXT_SCL);
+
     scd4x.begin(Wire);
     sen5x.begin(Wire);
     
     // Start Measurements
     Serial.println("Starting sensors...");
     scd4x.stopPeriodicMeasurement();
-    delay(500);
+    sen5x.deviceReset();
+    delay(100);
+
     scd4x.startPeriodicMeasurement();
     sen5x.startMeasurement();
 
@@ -126,6 +142,7 @@ void setup() {
 
     StaticJsonDocument<512> doc;
     doc["battery"] = M5.Power.getBatteryLevel();
+    doc["battery_voltage"] = M5.Power.getBatteryVoltage();
 
     // 5. Build JSON Payload for FIWARE IoT Agent
     if (scd_valid) {
@@ -137,7 +154,10 @@ void setup() {
         // Prefer SEN55 temp/humidity if valid, or just add PM/VOC
         doc["pm1"] = serialized(String(pm1p0, 1));
         doc["pm25"] = serialized(String(pm2p5, 1));
+        doc["pm4"] = serialized(String(pm4p0, 1));
         doc["pm10"] = serialized(String(pm10p0, 1));
+        if (!isnan(sen_temp)) doc["sen_temp"] = serialized(String(sen_temp, 2));
+        if (!isnan(sen_hum)) doc["sen_hum"] = serialized(String(sen_hum, 2));
         if (!isnan(voc)) doc["voc"] = serialized(String(voc, 1));
         if (!isnan(nox)) doc["nox"] = serialized(String(nox, 1));
     }

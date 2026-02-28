@@ -11,7 +11,7 @@ quantumleap:
       # -- Container image to deploy
       repository: quay.io/fiware/quantumleap-pg-init
       # -- Container image tag to deploy
-      tag: 1.0.0
+      tag: 0.9.0-PRE
   image:
     # -- Container image to deploy
     repository: quay.io/fiware/quantumleap

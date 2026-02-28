@@ -13,7 +13,7 @@ scorpio:
       - host: scorpio.local
         paths:
           - /
-    tls:[]
+    tls: []
 
 kafka:
   image:

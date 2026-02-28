@@ -44,6 +44,10 @@ spec:
               value: "ngb"
             - name: DBNAME
               value: "ngb"
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: "jdbc:postgresql://{{ include "scorpioBroker-aaio.fullname" . }}-postgres:5432/ngb?ApplicationName=aio-runner"
+            - name: QUARKUS_DATASOURCE_REACTIVE_URL
+              value: "postgresql://{{ include "scorpioBroker-aaio.fullname" . }}-postgres:5432/ngb?ApplicationName=aio-runner"
           ports:
             - containerPort: 9090
               protocol: TCP

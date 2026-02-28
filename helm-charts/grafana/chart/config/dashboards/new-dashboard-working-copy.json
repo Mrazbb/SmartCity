@@ -152,18 +152,11 @@
                 "value": "ppm"
               }
             ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "name 2"
-            },
-            "properties": []
           }
         ]
       },
       "gridPos": {
-        "h": 14,
+        "h": 19,
         "w": 24,
         "x": 0,
         "y": 1
@@ -194,15 +187,15 @@
                 "color": {
                   "fixed": "dark-green"
                 },
-                "opacity": 0.4,
+                "opacity": 0.8,
                 "rotation": {
                   "fixed": 0,
                   "max": 360,
                   "min": -360,
-                  "mode": "mod"
+                  "mode": "clamped"
                 },
                 "size": {
-                  "fixed": 5,
+                  "fixed": 10,
                   "max": 15,
                   "min": 2
                 },
@@ -210,19 +203,15 @@
                   "fixed": "img/icons/marker/circle.svg",
                   "mode": "fixed"
                 },
-                "symbolAlign": {
-                  "horizontal": "center",
-                  "vertical": "center"
-                },
                 "text": {
-                  "field": "name 2",
+                  "field": "id",
                   "fixed": "",
                   "mode": "field"
                 },
                 "textConfig": {
                   "fontSize": 12,
                   "offsetX": 0,
-                  "offsetY": 0,
+                  "offsetY": -15,
                   "textAlign": "center",
                   "textBaseline": "middle"
                 }
@@ -242,9 +231,9 @@
         "view": {
           "allLayers": true,
           "id": "coords",
-          "lat": 48.73866,
-          "lon": 19.15311,
-          "zoom": 16.3
+          "lat": 48.738853,
+          "lon": 19.139287,
+          "zoom": 13.63
         }
       },
       "pluginVersion": "10.4.2",

@@ -177,7 +177,7 @@ broker:
     # -- port of the postgres to be used
     dbPort: 5432
     # -- username to authenticate with at postgres
-    dbUser: user
+    dbUser: admin
     # -- password to authenticate with at postgres
     dbPassword: password
     ## connection pool of postgres

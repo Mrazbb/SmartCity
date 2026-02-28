@@ -1,0 +1,37 @@
+{{- if .Values.scorpio.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: scorpio
+  {{- with .Values.scorpio.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.scorpio.ingress.className }}
+  {{- if .Values.scorpio.ingress.tls }}
+  tls:
+    {{- range .Values.scorpio.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.scorpio.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: scorpio
+                port:
+                  number: {{ $.Values.scorpio.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}

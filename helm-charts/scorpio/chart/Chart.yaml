@@ -1,0 +1,5 @@
+apiVersion: v2
+name: scorpio
+description: Scorpio NGSI-LD Broker with Temporal DB (Postgres/Kafka)
+version: 1.0.0
+appVersion: "latest"

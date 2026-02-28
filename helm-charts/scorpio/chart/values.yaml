@@ -1,0 +1,30 @@
+scorpio:
+  image:
+    repository: scorpiobroker/all-in-one-runner
+    tag: java-kafka-latest
+    pullPolicy: Always
+  service:
+    port: 9090
+  ingress:
+    enabled: false
+    className: traefik
+    annotations: {}
+    hosts:
+      - host: scorpio.local
+        paths:
+          - /
+    tls:[]
+
+kafka:
+  image:
+    repository: apache/kafka
+    tag: 3.8.1
+
+postgres:
+  image:
+    repository: postgis/postgis
+    tag: latest
+  auth:
+    username: ngb
+    password: ngb
+    database: ngb

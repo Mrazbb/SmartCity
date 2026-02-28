@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scorpio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scorpio
+  template:
+    metadata:
+      labels:
+        app: scorpio
+    spec:
+      containers:
+        - name: scorpio
+          image: "{{ .Values.scorpio.image.repository }}:{{ .Values.scorpio.image.tag }}"
+          imagePullPolicy: {{ .Values.scorpio.image.pullPolicy }}
+          ports:
+            - containerPort: 9090
+          env:
+            - name: DBHOST
+              value: scorpio-postgres
+            - name: DBNAME
+              value: {{ .Values.postgres.auth.database }}
+            - name: DBUSER
+              value: {{ .Values.postgres.auth.username }}
+            - name: DBPASS
+              value: {{ .Values.postgres.auth.password }}
+            - name: BUSHOST
+              value: scorpio-kafka
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scorpio
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.scorpio.service.port }}
+      targetPort: 9090
+  selector:
+    app: scorpio

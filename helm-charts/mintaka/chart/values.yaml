@@ -1,0 +1,15 @@
+replicaCount: 1
+image:
+  repository: fiware/mintaka
+  tag: "0.7.0"
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 8080
+config:
+  MICRONAUT_SERVER_PORT: 8080
+  DATASOURCES_DEFAULT_HOST: tsdb
+  DATASOURCES_DEFAULT_PORT: 5432
+  DATASOURCES_DEFAULT_DATABASE: postgres
+  DATASOURCES_DEFAULT_USERNAME: admin
+  BASEPATH: "/ngsi-ld/v1"

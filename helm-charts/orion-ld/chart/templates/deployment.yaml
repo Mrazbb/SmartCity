@@ -347,7 +347,13 @@ spec:
             - name: {{ .Values.broker.envPrefix }}TROE_USER
               value: {{ .Values.broker.troe.dbUser | quote }}
             {{ end }}
-            {{ if .Values.broker.troe.dbPassword }}
+            {{ if .Values.broker.troe.dbPasswordSecret }}
+            - name: {{ .Values.broker.envPrefix }}TROE_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.broker.troe.dbPasswordSecret.name }}
+                  key: {{ .Values.broker.troe.dbPasswordSecret.key }}
+            {{ else if .Values.broker.troe.dbPassword }}
             - name: {{ .Values.broker.envPrefix }}TROE_PWD
               value: {{ .Values.broker.troe.dbPassword | quote }}
             {{ end }}

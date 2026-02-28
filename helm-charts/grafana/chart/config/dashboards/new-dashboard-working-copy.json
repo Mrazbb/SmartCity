@@ -246,7 +246,15 @@
             "co2",
             "temperature",
             "battery",
-            "rssi"
+            "rssi",
+            "battery_voltage",
+            "voc",
+            "sen_hum",
+            "sen_temp",
+            "pm1",
+            "pm25",
+            "pm4",
+            "pm10"
           ],
           "datasource": {
             "type": "ngsild-grafana-datasource",
@@ -275,6 +283,6 @@
   "timezone": "browser",
   "title": "New Dasboard working copy",
   "uid": "cfe1j2649m8zkd",
-  "version": 1,
+  "version": 3,
   "weekStart": ""
 }

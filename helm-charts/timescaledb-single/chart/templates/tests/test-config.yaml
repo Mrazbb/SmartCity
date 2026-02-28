@@ -10,7 +10,7 @@ metadata:
     cluster-name: {{ template "clusterName" . }}
   annotations:
     argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
 data:
   test.sh: |-
     # List current databases

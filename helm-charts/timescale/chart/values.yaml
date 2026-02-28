@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: timescale/timescaledb-ha
+  pullPolicy: IfNotPresent
+  tag: "pg16"
+
+service:
+  type: ClusterIP
+  port: 5432
+
+postgresql:
+  password: password
+  user: admin
+  database: postgres
+
+persistence:
+  enabled: false
+  size: 8Gi
+  storageClass: ""

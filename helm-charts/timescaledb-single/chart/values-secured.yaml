@@ -1,3 +1,0 @@
-# timescaledb-single:
-#   secrets:
-#     credentialsSecretName: "tsdb-credentials"

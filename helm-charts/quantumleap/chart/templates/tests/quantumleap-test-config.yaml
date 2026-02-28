@@ -7,21 +7,24 @@ metadata:
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
 data:
   test.sh: |-
-    # Post Notification 
-    curl -f -X POST {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/v2/notify \
-    -H 'fiware-service: test' \
-    -H 'fiware-servicepath: /test' \
-    -H 'Content-Type: application/json' \
+    # Post NGSI-LD Notification 
+    # Note: Using /ngsi-ld/v1/notify and NGSILD-Tenant header
+    curl -f -X POST {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/ngsi-ld/v1/notify \
+    -H 'NGSILD-Tenant: test' \
+    -H 'Content-Type: application/ld+json' \
     -d '{
-    "subscriptionId": "simulated-subscription-notification",
+    "id": "urn:ngsi-ld:Notification:test-123",
+    "type": "Notification",
+    "subscriptionId": "urn:ngsi-ld:Subscription:simulated-subscription-notification",
     "data": [
         {
             "id": "urn:ngsi-ld:test:test-entity",
             "type": "test",
             "test": {
-                "type": "Number",
+                "type": "Property",
                 "value": 0
-            }
+            },
+            "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
         }
     ]
     }' \
@@ -29,6 +32,6 @@ data:
     --retry-delay 10 \
     --retry-connrefused
 
-    curl --location --request DELETE {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/v2/entities/urn:ngsi-ld:test:test-entity?type=test \
-    -H 'fiware-service: test' \
-    -H 'fiware-servicepath: /test'
+    # Delete the entity using NGSI-LD endpoint
+    curl -f -X DELETE {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/ngsi-ld/v1/entities/urn:ngsi-ld:test:test-entity \
+    -H 'NGSILD-Tenant: test'

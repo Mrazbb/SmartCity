@@ -1,6 +1,6 @@
 timescaledb-single:
   secrets:
-    credentialsSecretName: "tsdb-credentials"
+    credentialsSecretName: ""
     credentials:
       PATRONI_SUPERUSER_PASSWORD: "password"
       PATRONI_REPLICATION_PASSWORD: "password"

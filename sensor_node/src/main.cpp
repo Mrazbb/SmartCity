@@ -129,7 +129,7 @@ void setup() {
 
     // 5. Build JSON Payload for FIWARE IoT Agent
     if (scd_valid) {
-        doc["co2"] = co2;
+        doc["co2"] = serialized(String((float)co2, 1));
         doc["temperature"] = serialized(String(scd_temp, 2));
         doc["humidity"] = serialized(String(scd_hum, 2));
     }

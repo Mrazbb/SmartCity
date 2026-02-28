@@ -1,6 +1,6 @@
 timescaledb-single:
   secrets:
     credentials:
-      PATRONI_SUPERUSER_PASSWORD: "test"
-      PATRONI_REPLICATION_PASSWORD: "test"
-      PATRONI_admin_PASSWORD: "test"
+      PATRONI_SUPERUSER_PASSWORD: "password"
+      PATRONI_REPLICATION_PASSWORD: "password"
+      PATRONI_admin_PASSWORD: "password"

@@ -67,9 +67,9 @@ quantumleap:
       # -- Database name inside Timescale
       name: postgres
       # -- User to connect to the database
-      user: postgres
+      user: admin
       # -- Password for the user to connect to the database
-      password: test
+      password: password
       # -- SSL connection to Timescale. Not working with SSL for the moment
       ssl: false
 

@@ -90,3 +90,6 @@ quantumleap:
     redisHost:
   runtime:
     logLevel: "WARNING"
+
+ingress:
+  enabled: false

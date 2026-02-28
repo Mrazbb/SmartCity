@@ -76,6 +76,7 @@ quantumleap:
   config:
     # -- Backend database. Default is timescale
     default-backend: "timescale"
+    default_backend: "timescale"
 
   resources:
     limits:
@@ -90,6 +91,9 @@ quantumleap:
     redisHost:
   runtime:
     logLevel: "WARNING"
+
+ingress:
+  enabled: false
 
 ingress:
   enabled: false

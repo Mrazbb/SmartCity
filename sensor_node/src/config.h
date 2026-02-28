@@ -15,7 +15,7 @@
 
 // FIWARE IoT Agent Settings
 // FIWARE_API_KEY moved to secrets.h
-#define DEVICE_ID "ProdSensor002"
+#define DEVICE_ID "M5Stack003"
 
 // Hardware Pins (M5Stack Air Quality SKU:K131)
 #define PIN_POWER_HOLD 46

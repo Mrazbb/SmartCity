@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 10,
+  "id": 4,
   "links": [],
   "panels": [
     {
@@ -152,6 +152,13 @@
                 "value": "ppm"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name 2"
+            },
+            "properties": []
           }
         ]
       },
@@ -187,15 +194,15 @@
                 "color": {
                   "fixed": "dark-green"
                 },
-                "opacity": 0.8,
+                "opacity": 0.4,
                 "rotation": {
                   "fixed": 0,
                   "max": 360,
                   "min": -360,
-                  "mode": "clamped"
+                  "mode": "mod"
                 },
                 "size": {
-                  "fixed": 10,
+                  "fixed": 5,
                   "max": 15,
                   "min": 2
                 },
@@ -203,15 +210,19 @@
                   "fixed": "img/icons/marker/circle.svg",
                   "mode": "fixed"
                 },
+                "symbolAlign": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                },
                 "text": {
-                  "field": "id",
+                  "field": "name 2",
                   "fixed": "",
                   "mode": "field"
                 },
                 "textConfig": {
                   "fontSize": 12,
                   "offsetX": 0,
-                  "offsetY": -15,
+                  "offsetY": 0,
                   "textAlign": "center",
                   "textBaseline": "middle"
                 }
@@ -231,39 +242,22 @@
         "view": {
           "allLayers": true,
           "id": "coords",
-          "lat": 48.738853,
-          "lon": 19.139287,
-          "zoom": 13.63
+          "lat": 48.73866,
+          "lon": 19.15311,
+          "zoom": 16.3
         }
       },
       "pluginVersion": "10.4.2",
       "targets": [
         {
           "attributes": [
-            "co",
-            "dataProvider",
             "location",
             "name",
             "humidity",
             "co2",
-            "timeInstant",
-            "observedAt",
-            "dateModified",
-            "ica",
-            "particulates",
-            "operationalStatus",
-            "pm10",
-            "pollutants",
-            "so2",
-            "pm25",
-            "source",
             "temperature",
-            "voc",
-            "o3",
-            "no2",
-            "no",
-            "pm1",
-            "h2s"
+            "battery",
+            "rssi"
           ],
           "datasource": {
             "type": "ngsild-grafana-datasource",
@@ -292,6 +286,6 @@
   "timezone": "browser",
   "title": "New Dasboard working copy",
   "uid": "cfe1j2649m8zkd",
-  "version": 5,
+  "version": 1,
   "weekStart": ""
 }

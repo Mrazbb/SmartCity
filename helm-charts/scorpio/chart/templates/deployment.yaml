@@ -51,6 +51,16 @@ spec:
           ports:
             - containerPort: 9090
               protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 9090
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 9090
+            initialDelaySeconds: 20
+            periodSeconds: 10
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

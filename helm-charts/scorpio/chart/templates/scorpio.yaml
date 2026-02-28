@@ -21,6 +21,8 @@ spec:
           env:
             - name: DBHOST
               value: scorpio-postgres
+            - name: DBPORT
+              value: "5432"
             - name: DBNAME
               value: {{ .Values.postgres.auth.database }}
             - name: DBUSER
@@ -29,6 +31,8 @@ spec:
               value: {{ .Values.postgres.auth.password }}
             - name: BUSHOST
               value: scorpio-kafka
+            - name: BUSPORT
+              value: "9092"
 ---
 apiVersion: v1
 kind: Service

@@ -18,7 +18,7 @@ ingress:
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls:[]
+  tls: []
 
 config:
   orionHost: "orion-ld"

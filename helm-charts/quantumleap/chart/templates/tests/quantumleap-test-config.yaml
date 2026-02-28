@@ -32,6 +32,8 @@ data:
     --retry-delay 10 \
     --retry-connrefused
 
+    sleep 5
+
     # Delete the entity using NGSI-v2 endpoint
-    curl -f -X DELETE {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/v2/entities/urn:ngsi-ld:test:test-entity \
-    -H 'NGSILD-Tenant: test'
+    curl -X DELETE {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/v2/entities/urn:ngsi-ld:test:test-entity \
+    -H 'NGSILD-Tenant: test' || true

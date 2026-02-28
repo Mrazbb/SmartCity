@@ -30,9 +30,10 @@ spec:
             - name: DATASOURCES_DEFAULT_USERNAME
               value: "{{ .Values.config.DATASOURCES_DEFAULT_USERNAME }}"
             - name: DATASOURCES_DEFAULT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: tsdb-credentials
-                  key: PATRONI_admin_PASSWORD
+              value: "{{ .Values.config.DATASOURCES_DEFAULT_PASSWORD }}"
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: tsdb-credentials
+              #     key: PATRONI_admin_PASSWORD
             - name: BASEPATH
               value: "{{ .Values.config.BASEPATH }}"

@@ -5,3 +5,4 @@ i
 
 
 add mintaka
+replaced postgres

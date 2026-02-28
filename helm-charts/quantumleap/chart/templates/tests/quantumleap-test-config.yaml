@@ -8,10 +8,10 @@ metadata:
 data:
   test.sh: |-
     # Post NGSI-LD Notification 
-    # Note: Using /ngsi-ld/v1/notify and NGSILD-Tenant header
-    curl -f -X POST {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/ngsi-ld/v1/notify \
+    # Note: Using /v2/notify and NGSILD-Tenant header
+    curl -f -X POST {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/v2/notify \
     -H 'NGSILD-Tenant: test' \
-    -H 'Content-Type: application/ld+json' \
+    -H 'Content-Type: application/json' \
     -d '{
     "id": "urn:ngsi-ld:Notification:test-123",
     "type": "Notification",
@@ -32,6 +32,6 @@ data:
     --retry-delay 10 \
     --retry-connrefused
 
-    # Delete the entity using NGSI-LD endpoint
-    curl -f -X DELETE {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/ngsi-ld/v1/entities/urn:ngsi-ld:test:test-entity \
+    # Delete the entity using NGSI-v2 endpoint
+    curl -f -X DELETE {{ include "quantumleap.fullname" . }}:{{ .Values.quantumleap.service.internalPort }}/v2/entities/urn:ngsi-ld:test:test-entity \
     -H 'NGSILD-Tenant: test'

@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-tsdb-postgis"
+  labels:
+    app: {{ template "timescaledb.fullname" . }}
+    chart: {{ template "timescaledb.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    cluster-name: {{ template "clusterName" . }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: psql
+          image: postgres:14-alpine
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until pg_isready -h {{ template "clusterName" . }} -p 5432 -U postgres; do sleep 2; done;
+              psql -h {{ template "clusterName" . }} -p 5432 -U postgres -d postgres -c "CREATE EXTENSION IF NOT EXISTS postgis CASCADE;"
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-credentials" (include "clusterName" .) }}
+                  key: PATRONI_SUPERUSER_PASSWORD
+      restartPolicy: OnFailure

@@ -124,14 +124,8 @@ void setup() {
     bool sen_valid = (sen5x.readMeasuredValues(pm1p0, pm2p5, pm4p0, pm10p0, sen_hum, sen_temp, voc, nox) == 0);
 
 
-    StaticJsonDocument<512> doc; // Increased size
-    doc["name"] = DEVICE_NAME;
-    
-    JsonObject loc = doc.createNestedObject("location");
-    loc["type"] = "Point";
-    JsonArray coords = loc.createNestedArray("coordinates");
-    coords.add(LONGITUDE);
-    coords.add(LATITUDE);
+    StaticJsonDocument<512> doc;
+    doc["battery"] = M5.Power.getBatteryLevel();
 
     // 5. Build JSON Payload for FIWARE IoT Agent
     if (scd_valid) {
@@ -148,12 +142,14 @@ void setup() {
         if (!isnan(nox)) doc["nox"] = serialized(String(nox, 1));
     }
 
-    String payload;
-    serializeJson(doc, payload);
-    Serial.println("Payload: " + payload);
-
     // 6. Connect & Publish (Only if we have valid data)
     if ((scd_valid || sen_valid) && connectWiFi()) {
+        doc["rssi"] = WiFi.RSSI();
+        
+        String payload;
+        serializeJson(doc, payload);
+        Serial.println("Payload: " + payload);
+
         if (connectMQTT()) {
             // IoT Agent JSON standard topic format: /<API_KEY>/<DEVICE_ID>/attrs
             String topic = String("/") + FIWARE_API_KEY + "/" + DEVICE_ID + "/attrs";

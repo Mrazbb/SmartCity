@@ -4,17 +4,18 @@
 // CONFIGURATION
 // ==========================================
 
+#include "secrets.h"
+
 // WiFi Settings
-#define WIFI_SSID "dd-wrt"
-#define WIFI_PASS NULL
+// Moved to secrets.h
 
 // MQTT Settings
 #define MQTT_SERVER "smartcity.marek-mraz.com"
 #define MQTT_PORT 1883
 
 // FIWARE IoT Agent Settings
-#define FIWARE_API_KEY "4jggokgpepnvsb2uv4s40d59ov" // From iot-agent-json values.yaml
-#define DEVICE_ID "AirQuality001"
+// FIWARE_API_KEY moved to secrets.h
+#define DEVICE_ID "ProdSensor002"
 
 // Hardware Pins (M5Stack Air Quality SKU:K131)
 #define PIN_POWER_HOLD 46

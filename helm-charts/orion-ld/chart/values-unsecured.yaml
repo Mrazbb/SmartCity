@@ -1,5 +1,0 @@
-orion-ld:
-  broker:
-    db:
-      auth:
-        password: test

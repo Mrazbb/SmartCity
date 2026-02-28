@@ -1,6 +1,0 @@
-orion-ld:
-  broker:
-    db:
-      existingSecret:
-        name: mongodb-secret
-        key: mongodb-root-password

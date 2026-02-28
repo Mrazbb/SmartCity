@@ -1,20 +1,19 @@
 apiVersion: v2
-name: orion-ld
-description: Chart holder for FIWARE Orion Context Broker LD
-
-type: application
-version: 1.0.0
-appVersion: "1.0.1" # Orion-LD version 1.0.1
-
-dependencies:
-- name: orion-ld
-  version: 1.0.2
-  repository: file://./orion-ld
-
+name: orion
+version: 1.6.6
+appVersion: 1.0.1
+kubeVersion: '>= 1.19-0'
+home: https://github.com/FIWARE/context.Orion-LD
+description: A Helm chart for running the fiware orion-ld context broker on kubernetes.
+icon: https://fiware.github.io/catalogue/img/fiware.png
+keywords:
+  - fiware
+  - orion-ld
+  - orion
+sources:
+  - https://github.com/FIWARE/context.Orion-LD
 maintainers:
-  - name: Felipe Roca
-    email: felipe@hopu.org
-  - name: Alvaro Lopez
-    email: alopezme@redhat.com
-  - name: Stefan Wiedemann 
+  - name: wistefan
     email: stefan.wiedemann@fiware.org
+annotations:
+  charts.openshift.io/name: orion-ld

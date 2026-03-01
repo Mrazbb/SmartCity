@@ -33,6 +33,7 @@ data:
                 entities = payload.get('data',[])
                 if not entities:
                     self.send_response(204); self.end_headers(); return
+                print(f"Entities: {entities}")
 
                 remote_context = 'https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.3.jsonld'
                 url = f'{target_base_url.rstrip("/")}/ngsi-ld/v1/entityOperations/upsert'

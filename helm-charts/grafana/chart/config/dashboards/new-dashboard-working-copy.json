@@ -232,8 +232,8 @@
         "view": {
           "allLayers": true,
           "id": "coords",
-          "lat": 48.738853,
-          "lon": 19.139287,
+          "lat": 48.738629,
+          "lon": 19.154856,
           "noRepeat": false,
           "zoom": 13.63
         }
@@ -253,7 +253,7 @@
           "refId": "A"
         }
       ],
-      "title": "Sensor Live Map (All Sensors)",
+      "title": "Sensor Live Map",
       "type": "geomap"
     },
     {
@@ -348,11 +348,12 @@
           ],
           "entityId": "urn:ngsi-ld:AirQualityObserved:M5Stack:003",
           "entityType": "AirQualityObserved",
+          "namePattern": "attribute",
           "queryType": "temporal",
           "refId": "A"
         }
       ],
-      "title": "New panel",
+      "title": "Historic Values",
       "type": "timeseries"
     }
   ],
@@ -371,6 +372,6 @@
   "timezone": "browser",
   "title": "New Dasboard working copy",
   "uid": "cfe1j2649m8zkd",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

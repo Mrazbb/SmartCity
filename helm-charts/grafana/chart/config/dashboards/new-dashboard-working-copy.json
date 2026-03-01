@@ -21,17 +21,237 @@
   "links": [],
   "panels": [
     {
-      "collapsed": false,
+      "datasource": {
+        "type": "ngsild-grafana-datasource",
+        "uid": "ngsild"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
       "gridPos": {
-        "h": 1,
-        "w": 24,
+        "h": 8,
+        "w": 12,
         "x": 0,
         "y": 0
       },
-      "id": 3,
-      "panels": [],
-      "title": "Row title",
-      "type": "row"
+      "id": 6,
+      "options": {
+        "basemap": {
+          "config": {},
+          "name": "Layer 0",
+          "noRepeat": false,
+          "type": "default"
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": false,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "fixed": "dark-green"
+                },
+                "opacity": 0.8,
+                "rotation": {
+                  "fixed": 0,
+                  "max": 360,
+                  "min": -360,
+                  "mode": "mod"
+                },
+                "size": {
+                  "fixed": 5,
+                  "max": 15,
+                  "min": 2
+                },
+                "symbol": {
+                  "fixed": "img/icons/marker/circle.svg",
+                  "mode": "fixed"
+                },
+                "symbolAlign": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                },
+                "text": {
+                  "fixed": "",
+                  "mode": "field"
+                },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "textAlign": "center",
+                  "textBaseline": "middle"
+                }
+              }
+            },
+            "location": {
+              "mode": "auto"
+            },
+            "name": "Layer 1",
+            "tooltip": true,
+            "type": "markers"
+          }
+        ],
+        "tooltip": {
+          "mode": "details"
+        },
+        "view": {
+          "allLayers": true,
+          "id": "coords",
+          "lat": 48.738495,
+          "lon": 19.151042,
+          "noRepeat": false,
+          "zoom": 13.97
+        }
+      },
+      "pluginVersion": "12.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
+          },
+          "entityType": "AirQualityObserved",
+          "queryType": "geo",
+          "refId": "A"
+        }
+      ],
+      "title": "live map",
+      "type": "geomap"
+    },
+    {
+      "datasource": {
+        "type": "ngsild-grafana-datasource",
+        "uid": "ngsild"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.0",
+      "targets": [
+        {
+          "attributes": [
+            "pm1"
+          ],
+          "datasource": {
+            "type": "ngsild-grafana-datasource",
+            "uid": "ngsild"
+          },
+          "entityType": "AirQualityObserved",
+          "namePattern": "entity_plus_attribute",
+          "queryType": "temporal",
+          "refId": "A",
+          "timeProperty": "observedAt"
+        }
+      ],
+      "title": "historic values",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -157,10 +377,10 @@
         ]
       },
       "gridPos": {
-        "h": 9,
-        "w": 10,
+        "h": 8,
+        "w": 12,
         "x": 0,
-        "y": 1
+        "y": 8
       },
       "id": 2,
       "options": {
@@ -318,10 +538,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 14,
-        "x": 10,
-        "y": 1
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
       },
       "id": 4,
       "options": {
@@ -355,6 +575,19 @@
       ],
       "title": "Historic Values",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 3,
+      "panels": [],
+      "title": "Row title",
+      "type": "row"
     }
   ],
   "preload": false,
@@ -372,6 +605,6 @@
   "timezone": "browser",
   "title": "New Dasboard working copy",
   "uid": "cfe1j2649m8zkd",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }

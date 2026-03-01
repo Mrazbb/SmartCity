@@ -40,15 +40,6 @@ data:
                 
                 print(f"Routing {len(entities)} entities to -> {url}")
                 print(f"Entities: {entities}")
-                print(f"Headers: {headers}")
-                print(f"Method: {method}")
-                print(f"Data: {data}")
-                print(f"Response: {response}")
-                print(f"Status: {status}")
-                print(f"Reason: {reason}")
-                print(f"Body: {body}")
-                print(f"Content: {content}")
-
                 req = urllib.request.Request(
                     url, 
                     data=json.dumps(entities).encode('utf-8'),

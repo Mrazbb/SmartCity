@@ -6,15 +6,25 @@ metadata:
     {{- include "orion-sync-unwrapper.labels" . | nindent 4 }}
 data:
   unwrapper.py: |
-    import urllib.request, json
+    import urllib.request, json, traceback
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
     class DynamicUnwrapper(BaseHTTPRequestHandler):
+        def do_GET(self):
+            # Useful for health checks
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"Dynamic Unwrapper is running.")
+
+        def do_HEAD(self):
+            self.send_response(200)
+            self.end_headers()
+
         def do_POST(self):
             try:
                 target_base_url = self.path.lstrip('/')
                 if not target_base_url.startswith('http'):
-                    print("Error: Invalid or missing target URL provided in path (must start with http/https).")
+                    print(f"Error: Invalid path '{self.path}'. Target URL must start with http/https.")
                     self.send_response(400); self.end_headers(); return
 
                 length = int(self.headers.get('Content-Length', 0))
@@ -28,6 +38,15 @@ data:
                 url = f'{target_base_url.rstrip("/")}/ngsi-ld/v1/entityOperations/upsert'
                 
                 print(f"Routing {len(entities)} entities to -> {url}")
+                print(f"Entities: {entities}")
+                print(f"Headers: {headers}")
+                print(f"Method: {method}")
+                print(f"Data: {data}")
+                print(f"Response: {response}")
+                print(f"Status: {status}")
+                print(f"Reason: {reason}")
+                print(f"Body: {body}")
+                print(f"Content: {content}")
 
                 req = urllib.request.Request(
                     url, 
@@ -35,6 +54,7 @@ data:
                     headers={
                         'Content-Type': 'application/json',
                         'Accept': 'application/ld+json',
+                        'NGSILD-Tenant': 'airquality',
                         'Link': f'<{remote_context}>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"'
                     },
                     method='POST'
@@ -45,7 +65,9 @@ data:
                 
                 self.send_response(200); self.end_headers()
             except Exception as e:
-                print(f"Error: {e}"); self.send_response(500); self.end_headers()
+                print(f"Error processing request: {e}")
+                traceback.print_exc()
+                self.send_response(500); self.end_headers()
 
     print("Dynamic Unwrapper listening on port 8080...")
     HTTPServer(('', 8080), DynamicUnwrapper).serve_forever()

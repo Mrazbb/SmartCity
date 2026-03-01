@@ -36,7 +36,7 @@
 
 // Sleep Settings
 // How long the device should sleep between measurements (in minutes)
-#define SLEEP_MINUTES 5
+#define SLEEP_MINUTES 1
 
 // In milliseconds
 #define SLEEP_MS (SLEEP_MINUTES * 60 * 1000)

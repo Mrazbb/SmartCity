@@ -27,6 +27,7 @@ data:
                     print(f"Error: Invalid path '{self.path}'. Target URL must start with http/https.")
                     self.send_response(400); self.end_headers(); return
 
+
                 tenant = self.headers.get('NGSILD-Tenant', 'AirQuality')
                 length = int(self.headers.get('Content-Length', 0))
                 payload = json.loads(self.rfile.read(length))

@@ -219,7 +219,7 @@
         "x": 12,
         "y": 0
       },
-      "id": 5,
+      "id": 4,
       "options": {
         "legend": {
           "calcs": [],
@@ -237,20 +237,19 @@
       "targets": [
         {
           "attributes": [
-            "pm1"
+            "pm1",
+            "pm10",
+            "pm25",
+            "pm4"
           ],
-          "datasource": {
-            "type": "ngsild-grafana-datasource",
-            "uid": "ngsild"
-          },
+          "entityId": "urn:ngsi-ld:AirQualityObserved:M5Stack:003",
           "entityType": "AirQualityObserved",
-          "namePattern": "entity_plus_attribute",
+          "namePattern": "attribute",
           "queryType": "temporal",
-          "refId": "A",
-          "timeProperty": "observedAt"
+          "refId": "A"
         }
       ],
-      "title": "historic values",
+      "title": "Historic Values PM ",
       "type": "timeseries"
     },
     {
@@ -417,7 +416,7 @@
         "x": 12,
         "y": 8
       },
-      "id": 4,
+      "id": 9,
       "options": {
         "legend": {
           "calcs": [],
@@ -435,10 +434,7 @@
       "targets": [
         {
           "attributes": [
-            "pm1",
-            "pm10",
-            "pm25",
-            "pm4"
+            "temperature"
           ],
           "entityId": "urn:ngsi-ld:AirQualityObserved:M5Stack:003",
           "entityType": "AirQualityObserved",
@@ -447,7 +443,7 @@
           "refId": "A"
         }
       ],
-      "title": "Historic Values PM ",
+      "title": "Historic Values Temperature",
       "type": "timeseries"
     },
     {
@@ -702,6 +698,6 @@
   "timezone": "browser",
   "title": "New Dashboard",
   "uid": "cfe1j2649m8zkd",
-  "version": 4,
+  "version": 6,
   "weekStart": ""
 }

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: edc
+description: Eclipse Dataspace Connector (Sovity CE)
+type: application
+version: 1.0.0
+appVersion: "16.4.3"

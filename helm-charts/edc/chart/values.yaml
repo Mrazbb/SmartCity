@@ -1,0 +1,27 @@
+nameOverride: ""
+fullnameOverride: ""
+
+participantId: "my-participant"
+title: "EDC Connector"
+description: "Eclipse Dataspace Connector"
+apiKey: "SomeOtherApiKey"
+
+ui:
+  image: ghcr.io/sovity/edc-ce-ui:16.4.3
+
+connector:
+  image: ghcr.io/sovity/edc-ce:16.4.3
+  preconfiguredCounterparties: ""
+
+db:
+  image: postgres:17-alpine
+  user: db-user
+  password: db-pass
+  name: db-name
+
+ingress:
+  enabled: false
+  className: traefik
+  annotations: {}
+  host: edc.local
+  tlsSecretName: ""

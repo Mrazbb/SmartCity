@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "edc.fullname" . }}-connector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "edc.fullname" . }}-connector
+  template:
+    metadata:
+      labels:
+        app: {{ include "edc.fullname" . }}-connector
+    spec:
+      containers:
+      - name: connector
+        image: {{ .Values.connector.image }}
+        env:
+        - name: sovity.deployment.kind
+          value: 'control-plane-with-integrated-data-plane'
+        - name: sovity.edc.fqdn.public
+          value: {{ .Values.ingress.host }}
+        - name: sovity.edc.fqdn.internal
+          value: 'localhost'
+        - name: sovity.jdbc.url
+          value: 'jdbc:postgresql://{{ include "edc.fullname" . }}-db:5432/{{ .Values.db.name }}'
+        - name: sovity.jdbc.user
+          value: {{ .Values.db.user }}
+        - name: sovity.jdbc.password
+          value: {{ .Values.db.password }}
+        - name: sovity.management.api.iam.kind
+          value: 'management-iam-api-key'
+        - name: edc.api.auth.key
+          value: {{ .Values.apiKey }}
+        - name: sovity.edc.title
+          value: {{ .Values.title }}
+        - name: sovity.edc.description
+          value: {{ .Values.description }}
+        - name: sovity.edc.ui.preconfigured.counterparties
+          value: {{ .Values.connector.preconfiguredCounterparties }}
+        - name: sovity.dataspace.kind
+          value: 'sovity-mock-iam'
+        - name: edc.participant.id
+          value: {{ .Values.participantId }}
+        - name: sovity.http.protocol
+          value: {{ if .Values.ingress.tlsSecretName }}'https://'{{ else }}'http://'{{ end }}
+        ports:
+        - containerPort: 11002
+          name: management
+        - containerPort: 11003
+          name: dsp
+        - containerPort: 11005
+          name: public
+        - containerPort: 11006
+          name: proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edc.fullname" . }}-connector
+spec:
+  ports:
+  - port: 11002
+    name: management
+  - port: 11003
+    name: dsp
+  - port: 11005
+    name: public
+  - port: 11006
+    name: proxy
+  selector:
+    app: {{ include "edc.fullname" . }}-connector

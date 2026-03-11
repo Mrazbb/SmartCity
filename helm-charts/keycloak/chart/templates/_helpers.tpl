@@ -1,3 +1,4 @@
+{{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
 */}}
@@ -7,8 +8,6 @@ Expand the name of the chart.
 
 {{/*
 Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
 */}}
 {{- define "keycloak.fullname" -}}
 {{- if .Values.fullnameOverride }}
@@ -36,11 +35,8 @@ Common labels
 {{- define "keycloak.labels" -}}
 helm.sh/chart: {{ include "keycloak.chart" . }}
 {{ include "keycloak.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
+app.kubernetes.io/version: {{ .Values.image.tag | default .Chart.AppVersion | toString | trunc 63 | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app: {{ include "keycloak.name" . }}
 {{- end }}
 
 {{/*
@@ -51,3 +47,41 @@ app.kubernetes.io/name: {{ include "keycloak.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "keycloak.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "keycloak.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the service DNS name.
+*/}}
+{{- define "keycloak.serviceDnsName" -}}
+{{ include "keycloak.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+{{- end }}
+
+{{- define "keycloak.databasePasswordEnv" -}}
+{{- if or .Values.database.password .Values.database.existingSecret -}}
+- name: KC_DB_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.database.existingSecret | default (printf "%s-database" (include "keycloak.fullname" . ))}}
+      key: {{ .Values.database.existingSecretKey | default "password" }}
+  {{- end }}
+{{- end -}}
+
+{{/*
+Renders a complete tree, even values that contains template.
+*/}}
+{{- define "keycloak.render" -}}
+  {{- if typeIs "string" .value }}
+    {{- tpl .value .context }}
+  {{ else }}
+    {{- tpl (.value | toYaml) .context }}
+  {{- end }}
+{{- end -}}

@@ -234,7 +234,8 @@ data:
           "credentials": [
             {
               "type": "password",
-              "value": "admin-user"
+              "value": "admin-user",
+              "temporary": false
             }
           ],
           "clientRoles": {
@@ -254,7 +255,8 @@ data:
           "credentials": [
             {
               "type": "password",
-              "value": "consumer-user"
+              "value": "consumer-user",
+               "temporary": false
             }
           ],
           "disableableCredentialTypes": [
@@ -278,7 +280,8 @@ data:
           "credentials": [
             {
               "type": "password",
-              "value": "producer-user"
+              "value": "producer-user",
+              "temporary": false
             }
           ],
           "clientRoles": {
@@ -297,7 +300,8 @@ data:
           "credentials": [
             {
               "type": "password",
-              "value": "subscriptor-user"
+              "value": "subscriptor-user",
+              "temporary": false
             }
           ],
           "clientRoles": {
@@ -316,7 +320,8 @@ data:
           "credentials": [
             {
               "type": "password",
-              "value": "airquality-producer"
+              "value": "airquality-producer",
+              "temporary": false
             }
           ],
           "clientRoles": {

@@ -9,14 +9,12 @@ realm:
       - https://grafana/
       - https://grafana-2/
   orionPep:
-    baseUrl: https://orion-ld
-    adminUrl: https://orion-ld
+    baseUrl: https://cb.local
+    adminUrl: https://cb.local
     redirectUris:
-      - https://orion-ld/
-      - https://orion-ld-2/
+      - https://cb.local/*
     webOrigins:
-      - https://orion-ld/
-      - https://orion-ld-2/
+      - https://cb.local
 
 route:
   enabled: true

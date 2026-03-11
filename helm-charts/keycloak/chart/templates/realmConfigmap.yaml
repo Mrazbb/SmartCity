@@ -229,8 +229,11 @@ data:
       "users": [
         {
           "username": "admin-user",
-          "enabled": true,
+          "emailVerified": true,
+          "firstName": "Admin",
+          "lastName": "User",
           "email": "admin-user@example.com",
+          "enabled": true,
           "credentials": [
             {
               "type": "password",
@@ -252,6 +255,9 @@ data:
         {
           "username": "consumer-user",
           "email": "consumer-user@example.com",
+          "emailVerified": true,
+          "firstName": "Consumer",
+          "lastName": "User",
           "enabled": true,
           "credentials": [
             {
@@ -278,6 +284,10 @@ data:
         {
           "username": "producer-user",
           "email": "producer-user@example.com",
+          "emailVerified": true,
+          "firstName": "Producer",
+          "lastName": "User",
+          "emailVerified": true,
           "enabled": true,
           "credentials": [
             {
@@ -299,6 +309,9 @@ data:
         {
           "username": "subscriptor-user",
           "email": "subscriptor-user@example.com",
+          "emailVerified": true,
+          "firstName": "Subscriptor",
+          "lastName": "User",
           "enabled": true,
           "credentials": [
             {
@@ -320,6 +333,9 @@ data:
         {
           "username": "airquality-producer",
           "email": "airquality-producer@example.com",
+          "emailVerified": true,
+          "firstName": "Airquality",
+          "lastName": "Producer",
           "enabled": true,
           "credentials": [
             {
@@ -379,7 +395,7 @@ data:
           "standardFlowEnabled": true,
           "implicitFlowEnabled": false,
           "directAccessGrantsEnabled": true,
-          "serviceAccountsEnabled": false,
+          "serviceAccountsEnabled": true,
           "publicClient": false,
           "frontchannelLogout": false,
           "protocol": "openid-connect",

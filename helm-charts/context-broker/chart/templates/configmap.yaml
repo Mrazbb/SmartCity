@@ -35,6 +35,7 @@ data:
             discovery: "{{ .Values.config.keycloakDiscoveryUrl }}"
             bearer_only: true
             use_jwks: true
+            ssl_verify: false
           opa:
             host: "http://127.0.0.1:8181"
             policy: policy/main/allow

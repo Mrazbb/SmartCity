@@ -38,7 +38,7 @@ data:
             ssl_verify: false
           opa:
             host: "http://127.0.0.1:8181"
-            policy: policy/main/allow
+            policy: policy/main
     #END
 ---
 apiVersion: v1

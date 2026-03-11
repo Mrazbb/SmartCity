@@ -13,10 +13,6 @@ data:
     apisix:
       node_listen: 80
       enable_admin: false
-    plugins:
-      - openid-connect
-      - opa
-      - proxy-rewrite
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -27,22 +23,7 @@ metadata:
 data:
   apisix.yaml: |
     routes:
-      - uri: /ngsi-ld/v1/temporal/entities*
-        upstream:
-          nodes:
-            "{{ .Values.config.mintakaHost }}:{{ .Values.config.mintakaPort }}": 1
-          type: roundrobin
-        plugins:
-          openid-connect:
-            client_id: "{{ .Values.config.keycloakClientId }}"
-            client_secret: "{{ .Values.config.keycloakClientSecret }}"
-            discovery: "{{ .Values.config.keycloakDiscoveryUrl }}"
-            bearer_only: true
-            use_jwks: true
-          opa:
-            host: "http://127.0.0.1:8181"
-            policy: policy/main
-      - uri: /*
+      - uri: "/*"
         upstream:
           nodes:
             "{{ .Values.config.orionHost }}:{{ .Values.config.orionPort }}": 1
@@ -56,7 +37,7 @@ data:
             use_jwks: true
           opa:
             host: "http://127.0.0.1:8181"
-            policy: policy/main
+            policy: policy/main/allow
     #END
 ---
 apiVersion: v1
@@ -72,7 +53,6 @@ data:
     import rego.v1
 
     default allow := false
-    default allowed_attrs := ""
 
     token := payload if {
         auth_header := input.request.headers.authorization
@@ -82,17 +62,17 @@ data:
     }
 
     allow if {
-        "admin" in token.resource_access["orion-pep"].roles
+        "admin" in token.resource_access["context-broker-pep"].roles
     }
     
     allow if {
-        "producer" in token.resource_access["orion-pep"].roles
+        "producer" in token.resource_access["context-broker-pep"].roles
     }
     
     allow if {
-        "consumer" in token.resource_access["orion-pep"].roles
+        "consumer" in token.resource_access["context-broker-pep"].roles
     }
 
     allow if {
-        "subscriptor" in token.resource_access["orion-pep"].roles
+        "subscriptor" in token.resource_access["context-broker-pep"].roles
     }

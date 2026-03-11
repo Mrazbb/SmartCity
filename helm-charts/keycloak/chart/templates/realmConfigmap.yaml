@@ -26,7 +26,7 @@ data:
           }
         ],
         "client": {
-          "orion-pep": [
+          "context-broker-pep": [
             {
               "name": "admin",
               "description": "A",
@@ -82,7 +82,7 @@ data:
             "user"
           ],
           "clientRoles": {
-            "orion-pep": [
+            "context-broker-pep": [
               "admin"
             ]
           }
@@ -111,7 +111,7 @@ data:
             ]
           },
           "clientRoles": {
-            "orion-pep": [
+            "context-broker-pep": [
               "admin",
               "producer",
               "subscriptor",
@@ -156,7 +156,7 @@ data:
               "name": "test-test-subscriptor",
               "path": "/test-test/test-test-subscriptor",
               "clientRoles": {
-                "orion-pep": [
+                "context-broker-pep": [
                   "subscriptor"
                 ]
               }
@@ -165,7 +165,7 @@ data:
               "name": "test-test-consumer",
               "path": "/test-test/test-test-consumer",
               "clientRoles": {
-                "orion-pep": [
+                "context-broker-pep": [
                   "consumer"
                 ]
               }
@@ -174,7 +174,7 @@ data:
               "name": "test-test-producer",
               "path": "/test-test/test-test-producer",
               "clientRoles": {
-                "orion-pep": [
+                "context-broker-pep": [
                   "producer"
                 ]
               }
@@ -200,7 +200,7 @@ data:
               "name": "airquality-data-subscriptor",
               "path": "/airquality-data/airquality-data-subscriptor",
               "clientRoles": {
-                "orion-pep": [
+                "context-broker-pep": [
                   "subscriptor"
                 ]
               }
@@ -209,7 +209,7 @@ data:
               "name": "airquality-data-consumer",
               "path": "/airquality-data/airquality-data-consumer",
               "clientRoles": {
-                "orion-pep": [
+                "context-broker-pep": [
                   "consumer"
                 ]
               }
@@ -218,7 +218,7 @@ data:
               "name": "airquality-data-producer",
               "path": "/airquality-data/airquality-data-producer",
               "clientRoles": {
-                "orion-pep": [
+                "context-broker-pep": [
                   "producer"
                 ]
               }
@@ -379,7 +379,7 @@ data:
           "nodeReRegistrationTimeout": -1
         },
         {
-          "clientId": "orion-pep",
+          "clientId": "context-broker-pep",
           "adminUrl": "{{ .Values.realm.orionPep.adminUrl }}",
           "baseUrl": "{{ .Values.realm.orionPep.baseUrl }}",
           "surrogateAuthRequired": false,
@@ -460,7 +460,7 @@ data:
                 "logic": "POSITIVE",
                 "decisionStrategy": "UNANIMOUS",
                 "config": {
-                  "roles": "[{\"id\":\"orion-pep/consumer\",\"required\":true}]"
+                  "roles": "[{\"id\":\"context-broker-pep/consumer\",\"required\":true}]"
                 }
               },
 
@@ -481,7 +481,7 @@ data:
                 "logic": "POSITIVE",
                 "decisionStrategy": "UNANIMOUS",
                 "config": {
-                  "roles": "[{\"id\":\"orion-pep/producer\",\"required\":true}]"
+                  "roles": "[{\"id\":\"context-broker-pep/producer\",\"required\":true}]"
                 }
               },
               {
@@ -501,7 +501,7 @@ data:
                 "logic": "POSITIVE",
                 "decisionStrategy": "UNANIMOUS",
                 "config": {
-                  "roles": "[{\"id\":\"orion-pep/admin\",\"required\":true}]"
+                  "roles": "[{\"id\":\"context-broker-pep/admin\",\"required\":true}]"
                 }
               },
 
@@ -512,7 +512,7 @@ data:
                 "logic": "POSITIVE",
                 "decisionStrategy": "UNANIMOUS",
                 "config": {
-                  "roles": "[{\"id\":\"orion-pep/subscriptor\",\"required\":true}]"
+                  "roles": "[{\"id\":\"context-broker-pep/subscriptor\",\"required\":true}]"
                 }
               },
               {

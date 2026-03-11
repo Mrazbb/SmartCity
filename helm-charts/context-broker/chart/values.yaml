@@ -25,6 +25,6 @@ config:
   orionPort: 9090
   mintakaHost: "mintaka"
   mintakaPort: 8080
-  keycloakClientId: "orion-pep"
+  keycloakClientId: "context-broker-pep"
   keycloakClientSecret: "978ad148-d99b-406d-83fc-578597290a79"
   keycloakDiscoveryUrl: "http://keycloak:80/realms/fiware-server/.well-known/openid-configuration"

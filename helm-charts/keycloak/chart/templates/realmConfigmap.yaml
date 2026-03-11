@@ -259,24 +259,19 @@ data:
           "firstName": "Consumer",
           "lastName": "User",
           "enabled": true,
-          "credentials": [
+          "credentials":[
             {
               "type": "password",
               "value": "consumer-user",
-               "temporary": false
+              "temporary": false
             }
           ],
-          "disableableCredentialTypes": [
-            "password"
-          ],
-          "requiredActions": [],
           "clientRoles": {
-            "account": [
+            "account":[
               "view-profile",
               "manage-account"
             ]
           },
-          "notBefore": 0,
           "groups": [
             "/test-test/test-test-consumer"
           ]
@@ -287,9 +282,8 @@ data:
           "emailVerified": true,
           "firstName": "Producer",
           "lastName": "User",
-          "emailVerified": true,
           "enabled": true,
-          "credentials": [
+          "credentials":[
             {
               "type": "password",
               "value": "producer-user",

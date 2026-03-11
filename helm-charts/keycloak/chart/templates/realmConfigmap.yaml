@@ -251,6 +251,7 @@ data:
         },
         {
           "username": "consumer-user",
+          "email": "consumer-user@example.com",
           "enabled": true,
           "credentials": [
             {
@@ -276,6 +277,7 @@ data:
         },
         {
           "username": "producer-user",
+          "email": "producer-user@example.com",
           "enabled": true,
           "credentials": [
             {
@@ -296,6 +298,7 @@ data:
         },
         {
           "username": "subscriptor-user",
+          "email": "subscriptor-user@example.com",
           "enabled": true,
           "credentials": [
             {
@@ -316,6 +319,7 @@ data:
         },
         {
           "username": "airquality-producer",
+          "email": "airquality-producer@example.com",
           "enabled": true,
           "credentials": [
             {

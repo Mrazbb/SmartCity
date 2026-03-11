@@ -230,7 +230,7 @@ data:
         {
           "username": "admin-user",
           "enabled": true,
-          "email": "admin-user@hopu.eu",
+          "email": "admin-user@example.com",
           "credentials": [
             {
               "type": "password",

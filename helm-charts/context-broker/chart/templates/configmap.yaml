@@ -61,18 +61,25 @@ data:
         [_, payload, _] := io.jwt.decode(jwt)
     }
 
+    # Admins can do anything
     allow if {
         "admin" in token.resource_access["context-broker-pep"].roles
     }
     
+    # Producers can create, update, and delete
     allow if {
         "producer" in token.resource_access["context-broker-pep"].roles
+        input.request.method in ["POST", "PATCH", "PUT", "DELETE"]
     }
     
+    # Consumers can only read (GET requests)
     allow if {
         "consumer" in token.resource_access["context-broker-pep"].roles
+        input.request.method == "GET"
     }
 
+    # Subscriptors can read and manage subscriptions
     allow if {
         "subscriptor" in token.resource_access["context-broker-pep"].roles
+        startswith(input.request.path, "/ngsi-ld/v1/subscriptions")
     }

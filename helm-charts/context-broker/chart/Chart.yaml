@@ -1,6 +1,6 @@
 apiVersion: v2
 name: context-broker
-description: NGINX reverse proxy for Orion-LD and Mintaka
+description: APISIX API Gateway + OPA as front door for Context Broker and Mintaka
 type: application
 version: 1.0.0
 appVersion: "1.0.0"

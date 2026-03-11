@@ -15,7 +15,7 @@ spec:
         {{- include "context-broker.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
+        - name: apisix
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -23,10 +23,39 @@ spec:
               containerPort: 80
               protocol: TCP
           volumeMounts:
-            - name: nginx-config
-              mountPath: /etc/nginx/conf.d/default.conf
-              subPath: default.conf
+            - name: apisix-config
+              mountPath: /usr/local/apisix/conf/config.yaml
+              subPath: config.yaml
+            - name: apisix-routes
+              mountPath: /usr/local/apisix/conf/apisix.yaml
+              subPath: apisix.yaml
+        - name: opa
+          image: openpolicyagent/opa:1.2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http-opa
+              containerPort: 8181
+              protocol: TCP
+          args:
+            - "run"
+            - "--ignore=.*"
+            - "--server"
+            - "-l"
+            - "debug"
+            - "--addr"
+            - "0.0.0.0:8181"
+            - "/policy/main.rego"
+          volumeMounts:
+            - name: opa-policy
+              mountPath: /policy/main.rego
+              subPath: main.rego
       volumes:
-        - name: nginx-config
+        - name: apisix-config
           configMap:
-            name: {{ include "context-broker.fullname" . }}-conf
+            name: {{ include "context-broker.fullname" . }}-apisix
+        - name: apisix-routes
+          configMap:
+            name: {{ include "context-broker.fullname" . }}-routes
+        - name: opa-policy
+          configMap:
+            name: {{ include "context-broker.fullname" . }}-opa

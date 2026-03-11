@@ -186,7 +186,7 @@ data:
           "path": "/airquality-data",
           "attributes": {
             "fiware-service": [
-              "AirQuality"
+              "airquality"
             ],
             "fiware-servicepath": [
               "/data"

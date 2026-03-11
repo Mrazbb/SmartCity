@@ -1,30 +1,98 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "context-broker.fullname" . }}-conf
+  name: {{ include "context-broker.fullname" . }}-apisix
   labels:
     {{- include "context-broker.labels" . | nindent 4 }}
 data:
-  default.conf: |
-    server {
-        listen 80;
-        server_name _;
+  config.yaml: |
+    deployment:
+      role: data_plane
+      role_data_plane:
+        config_provider: yaml
+    apisix:
+      node_listen: 80
+      enable_admin: false
+    plugins:
+      - openid-connect
+      - opa
+      - proxy-rewrite
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "context-broker.fullname" . }}-routes
+  labels:
+    {{- include "context-broker.labels" . | nindent 4 }}
+data:
+  apisix.yaml: |
+    routes:
+      - uri: /ngsi-ld/v1/temporal/entities*
+        upstream:
+          nodes:
+            "{{ .Values.config.mintakaHost }}:{{ .Values.config.mintakaPort }}": 1
+          type: roundrobin
+        plugins:
+          openid-connect:
+            client_id: "{{ .Values.config.keycloakClientId }}"
+            client_secret: "{{ .Values.config.keycloakClientSecret }}"
+            discovery: "{{ .Values.config.keycloakDiscoveryUrl }}"
+            bearer_only: true
+            use_jwks: true
+          opa:
+            host: "http://127.0.0.1:8181"
+            policy: policy/main
+      - uri: /*
+        upstream:
+          nodes:
+            "{{ .Values.config.orionHost }}:{{ .Values.config.orionPort }}": 1
+          type: roundrobin
+        plugins:
+          openid-connect:
+            client_id: "{{ .Values.config.keycloakClientId }}"
+            client_secret: "{{ .Values.config.keycloakClientSecret }}"
+            discovery: "{{ .Values.config.keycloakDiscoveryUrl }}"
+            bearer_only: true
+            use_jwks: true
+          opa:
+            host: "http://127.0.0.1:8181"
+            policy: policy/main
+    #END
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "context-broker.fullname" . }}-opa
+  labels:
+    {{- include "context-broker.labels" . | nindent 4 }}
+data:
+  main.rego: |
+    package policy.main
 
-        # Forward temporal API to Mintaka
-        location ~ ^/ngsi-ld/v1/temporal/entities {
-            proxy_pass http://{{ .Values.config.mintakaHost }}:{{ .Values.config.mintakaPort }};
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
+    import rego.v1
 
-        # Forward everything else to Orion-LD
-        location / {
-            proxy_pass http://{{ .Values.config.orionHost }}:{{ .Values.config.orionPort }};
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
+    default allow := false
+    default allowed_attrs := ""
+
+    token := payload if {
+        auth_header := input.request.headers.authorization
+        startswith(auth_header, "Bearer ")
+        [_, jwt] := split(auth_header, " ")
+        [_, payload, _] := io.jwt.decode(jwt)
+    }
+
+    allow if {
+        "admin" in token.resource_access["orion-pep"].roles
+    }
+    
+    allow if {
+        "producer" in token.resource_access["orion-pep"].roles
+    }
+    
+    allow if {
+        "consumer" in token.resource_access["orion-pep"].roles
+    }
+
+    allow if {
+        "subscriptor" in token.resource_access["orion-pep"].roles
     }

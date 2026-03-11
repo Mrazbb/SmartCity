@@ -28,7 +28,7 @@ data:
                     self.send_response(400); self.end_headers(); return
 
 
-                tenant = self.headers.get('NGSILD-Tenant', 'AirQuality')
+                tenant = self.headers.get('NGSILD-Tenant', 'airquality')
                 length = int(self.headers.get('Content-Length', 0))
                 payload = json.loads(self.rfile.read(length))
                 

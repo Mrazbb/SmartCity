@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: apache/apisix
   pullPolicy: IfNotPresent
-  tag: "alpine"
+  tag: "3.9.1-debian"
 
 service:
   type: ClusterIP
@@ -21,7 +21,10 @@ ingress:
   tls: []
 
 config:
-  orionHost: "orion-ld"
-  orionPort: 1026
+  orionHost: "scorpio"
+  orionPort: 9090
   mintakaHost: "mintaka"
   mintakaPort: 8080
+  keycloakClientId: "orion-pep"
+  keycloakClientSecret: "978ad148-d99b-406d-83fc-578597290a79"
+  keycloakDiscoveryUrl: "http://keycloak:80/realms/fiware-server/.well-known/openid-configuration"

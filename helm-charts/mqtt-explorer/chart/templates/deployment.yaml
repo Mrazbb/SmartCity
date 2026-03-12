@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mqtt-explorer.fullname" . }}
+  labels:
+    {{- include "mqtt-explorer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mqtt-explorer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mqtt-explorer.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: mqtt-explorer
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MQTT_EXPLORER_SKIP_AUTH
+              value: "true"
+            - name: PORT
+              value: "3000"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+        {{- if .Values.oauth2Proxy.enabled }}
+        - name: oauth2-proxy
+          image: "{{ .Values.oauth2Proxy.image.repository }}:{{ .Values.oauth2Proxy.image.tag }}"
+          args:
+            - --provider=oidc
+            - --client-id={{ .Values.oauth2Proxy.clientId }}
+            - --client-secret={{ .Values.oauth2Proxy.clientSecret }}
+            - --cookie-secret={{ .Values.oauth2Proxy.cookieSecret }}
+            - --oidc-issuer-url={{ .Values.oauth2Proxy.oidcIssuerUrl }}
+            - --upstream=http://127.0.0.1:3000
+            - --http-address=0.0.0.0:4180
+            - --cookie-secure=false
+            - --email-domain=*
+            - --insecure-oidc-allow-unverified-email=true
+            - --pass-access-token=true
+            - --pass-authorization-header=true
+          ports:
+            - name: proxy
+              containerPort: 4180
+              protocol: TCP
+        {{- end }}
+      volumes:
+        - name: data
+          emptyDir: {}

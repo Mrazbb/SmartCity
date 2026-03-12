@@ -1,0 +1,5 @@
+apiVersion: v2
+name: mqtt-explorer
+description: MQTT Explorer Web Application with optional OAuth2 Proxy
+type: application
+version: 1.0.0

@@ -46,6 +46,7 @@ spec:
             - --insecure-oidc-allow-unverified-email=true
             - --pass-access-token=true
             - --pass-authorization-header=true
+            - --reverse-proxy=true
           ports:
             - name: proxy
               containerPort: 4180

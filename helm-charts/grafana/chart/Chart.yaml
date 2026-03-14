@@ -3,7 +3,7 @@ name: grafana
 description: A Helm chart for Kubernetes to deploy Grafana using the official Helm Chart.
 type: application
 version: 1.0.0
-appVersion: "8.5.2" # Grafana version 8.5.2
+appVersion: "12.4" 
 icon: https://raw.githubusercontent.com/grafana/grafana/master/public/img/logo_transparent_400x.png
 keywords:
   - grafana

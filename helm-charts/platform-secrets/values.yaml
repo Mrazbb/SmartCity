@@ -19,3 +19,6 @@ secretsData:
     client-secret: "cb-pep-oauth-secret-123!"
   ngsild-oauth:
     client-secret: "ngsild-oauth-secret-123!"
+  node-red-oauth2:
+    client-secret: "node-red-oauth-secret-123!"
+    cookie-secret: "ZW5jcnlwdGVkLWNvb2tpZS1zZWNyZXQtMTIzNDU2Nzg="

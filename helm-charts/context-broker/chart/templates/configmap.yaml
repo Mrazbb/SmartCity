@@ -29,10 +29,10 @@ data:
             "{{ .Values.config.orionHost }}:{{ .Values.config.orionPort }}": 1
           type: roundrobin
         plugins:
-            openid-connect:
-              client_id: "{{ .Values.config.keycloakClientId }}"
-              client_secret: "${{ "{{" }}KEYCLOAK_CLIENT_SECRET{{ "}}" }}"
-              discovery: "{{ .Values.config.keycloakDiscoveryUrl }}"
+          openid-connect:
+            client_id: "{{ .Values.config.keycloakClientId }}"
+            client_secret: "${{ "{{" }}KEYCLOAK_CLIENT_SECRET{{ "}}" }}"
+            discovery: "{{ .Values.config.keycloakDiscoveryUrl }}"
             bearer_only: true
             use_jwks: true
             ssl_verify: false

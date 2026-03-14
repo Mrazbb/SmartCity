@@ -33,11 +33,31 @@ spec:
         {{- if .Values.oauth2Proxy.enabled }}
         - name: oauth2-proxy
           image: "{{ .Values.oauth2Proxy.image.repository }}:{{ .Values.oauth2Proxy.image.tag }}"
+          {{- if .Values.oauth2Proxy.existingSecret }}
+          env:
+            - name: OAUTH2_PROXY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oauth2Proxy.existingSecret }}
+                  key: client-id
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oauth2Proxy.existingSecret }}
+                  key: client-secret
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oauth2Proxy.existingSecret }}
+                  key: cookie-secret
+          {{- end }}
           args:
             - --provider=oidc
+            {{- if not .Values.oauth2Proxy.existingSecret }}
             - --client-id={{ .Values.oauth2Proxy.clientId }}
             - --client-secret={{ .Values.oauth2Proxy.clientSecret }}
             - --cookie-secret={{ .Values.oauth2Proxy.cookieSecret }}
+            {{- end }}
             - --oidc-issuer-url={{ .Values.oauth2Proxy.oidcIssuerUrl }}
             - --upstream=http://127.0.0.1:3000
             - --http-address=0.0.0.0:4180

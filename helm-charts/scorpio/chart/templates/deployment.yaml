@@ -41,7 +41,14 @@ spec:
             - name: DBUSER
               value: "{{ .Values.postgresql.user }}"
             - name: DBPASS
+              {{- if .Values.postgresql.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.existingSecret }}
+                  key: {{ .Values.postgresql.existingSecretPasswordKey | default "password" }}
+              {{- else }}
               value: "{{ .Values.postgresql.password }}"
+              {{- end }}
             - name: DBNAME
               value: "{{ .Values.postgresql.database }}"
             - name: QUARKUS_DATASOURCE_JDBC_URL

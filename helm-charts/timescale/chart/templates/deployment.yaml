@@ -24,7 +24,14 @@ spec:
               protocol: TCP
           env:
             - name: POSTGRES_PASSWORD
+              {{- if .Values.postgresql.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.existingSecret }}
+                  key: {{ .Values.postgresql.existingSecretPasswordKey | default "password" }}
+              {{- else }}
               value: {{ .Values.postgresql.password | quote }}
+              {{- end }}
             - name: POSTGRES_USER
               value: {{ .Values.postgresql.user | quote }}
             - name: POSTGRES_DB

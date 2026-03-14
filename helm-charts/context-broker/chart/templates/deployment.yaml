@@ -18,6 +18,18 @@ spec:
         - name: apisix
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.config.existingSecret }}
+          env:
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.existingSecret }}
+                  key: {{ .Values.config.existingSecretKey | default "client-secret" }}
+          {{- else }}
+          env:
+            - name: KEYCLOAK_CLIENT_SECRET
+              value: "{{ .Values.config.keycloakClientSecret }}"
+          {{- end }}
           ports:
             - name: http
               containerPort: 80

@@ -18,7 +18,7 @@ secretsData:
   mqtt-explorer-oauth2:
     client-id: "mqtt-explorer"
     client-secret: "mqtt-explorer-oauth-secret-123!"
-    cookie-secret: "ZW5jcnlwdGVkLWNvb2tpZS1zZWNyZXQtMTIzNDU2Nzg="
+    cookie-secret: "encrypted-cookie-secret-12345678"
   cb-pep-credentials:
     client-secret: "cb-pep-oauth-secret-123!"
   ngsild-oauth:
@@ -26,4 +26,4 @@ secretsData:
   node-red-oauth2:
     client-id: "node-red"
     client-secret: "node-red-oauth-secret-123!"
-    cookie-secret: "ZW5jcnlwdGVkLWNvb2tpZS1zZWNyZXQtMTIzNDU2Nzg="
+    cookie-secret: "encrypted-cookie-secret-12345678"
